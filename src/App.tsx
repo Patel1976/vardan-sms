@@ -3,8 +3,6 @@ import React, { useState, useEffect, FC } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
-// Layout components
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -13,9 +11,6 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import ManageUsers from './pages/UserManagement/ManageUsers';
 import AddUser from './pages/UserManagement/AddUser';
-import ManageRoles from './pages/UserManagement/ManageRoles';
-import AddRole from './pages/UserManagement/AddRole';
-import RolePermissions from './pages/UserManagement/RolePermissions';
 import ManageStaff from './pages/StaffManagement/ManageStaff';
 import AddStaff from './pages/StaffManagement/AddStaff';
 import WorkJourney from './pages/StaffManagement/WorkJourney';
@@ -28,7 +23,6 @@ import Login from './pages/Auth/Login';
 import LockScreen from './pages/Auth/LockScreen';
 import NotFound from './pages/NotFound';
 
-// Wrapper component to determine if layout should be shown
 const AppContent = () => {
   const location = useLocation();
     const { isAuthenticated } = useAuth();
@@ -46,7 +40,6 @@ const AppContent = () => {
   };
 
   useEffect(() => {
-    // Apply theme to body
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
   }, [theme]);

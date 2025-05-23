@@ -52,10 +52,7 @@ const MyProfile = () => {
 
   return (
     <div className="my-profile">
-      <PageTitle
-        title="My Profile"
-        breadcrumbs={[{ text: "Home" }, { text: "My Profile" }]}
-      />
+      <PageTitle title="My Profile" breadcrumbs={[{ text: "My Profile" }]} />
 
       <Row>
         <Col lg={2} className="mb-4 d-flex align-items-center">
@@ -122,7 +119,7 @@ const MyProfile = () => {
                       <Row>
                         <Col md={12}>
                           <Form.Group className="mb-3">
-                            <Form.Label>First Name</Form.Label>
+                            <Form.Label>Name</Form.Label>
                             <Form.Control
                               type="text"
                               name="firstName"
@@ -146,7 +143,7 @@ const MyProfile = () => {
 
                         <Col md={12}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Phone Number</Form.Label>
+                            <Form.Label>Phone No.</Form.Label>
                             <Form.Control
                               type="text"
                               name="phone"
@@ -159,7 +156,7 @@ const MyProfile = () => {
 
                       <Button variant="primary" type="submit">
                         <FontAwesomeIcon icon={faSave} className="me-1" />
-                        Save Changes
+                        Save
                       </Button>
                     </Form>
                   </Tab.Pane>
@@ -198,7 +195,7 @@ const MyProfile = () => {
 
                       <Button variant="primary" type="submit">
                         <FontAwesomeIcon icon={faKey} className="me-1" />
-                        Update Password
+                        Update
                       </Button>
                     </Form>
                   </Tab.Pane>

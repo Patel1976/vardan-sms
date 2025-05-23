@@ -145,7 +145,7 @@ const AddStaff = () => {
       <PageTitle
         title={isEditMode ? "Edit Staff" : "Add Staff"}
         breadcrumbs={[
-          { text: "Staff Management", link: "/staff" },
+          { text: "Manage Staff", link: "/staff" },
           { text: isEditMode ? "Edit Staff" : "Add Staff" },
         ]}
       />
@@ -153,7 +153,7 @@ const AddStaff = () => {
       <Card>
         <Card.Header className="d-flex align-items-center justify-content-between">
           <div className="text-xl fw-semibold">
-            {isEditMode ? "Edit Staff Member" : "Add New Staff Member"}
+            {isEditMode ? "Edit Staff" : "Add Staff"}
           </div>
           <Button
             variant="secondary"
@@ -168,7 +168,7 @@ const AddStaff = () => {
         <Card.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
             <Row>
-              <Col md={3} className="mb-4 text-center">
+              <Col md={12} className="mb-4 text-center">
                 <div
                   onClick={() =>
                     document.getElementById("profileImage").click()
@@ -200,7 +200,6 @@ const AddStaff = () => {
                       <div className="upload-label">Upload Photo</div>
                     </div>
                   )}
-
                   <div className="upload-hover"></div>
                 </div>
 
@@ -212,16 +211,15 @@ const AddStaff = () => {
                   style={{ display: "none" }}
                 />
               </Col>
-
-              <Col md={9}>
+              <Col md={12}>
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3" controlId="staffName">
-                      <Form.Label>Full Name</Form.Label>
+                      <Form.Label>Name</Form.Label>
                       <Form.Control
                         required
                         type="text"
-                        placeholder="Enter staff name"
+                        placeholder="Enter Name"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
@@ -238,7 +236,7 @@ const AddStaff = () => {
                       <Form.Control
                         required
                         type="email"
-                        placeholder="Enter email address"
+                        placeholder="Enter Email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
@@ -253,10 +251,10 @@ const AddStaff = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3" controlId="staffPhone">
-                      <Form.Label>Phone</Form.Label>
+                      <Form.Label>Phone No.</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder="Enter phone number"
+                        placeholder="Enter Phone No."
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
@@ -307,7 +305,7 @@ const AddStaff = () => {
             <div className="d-flex gap-2 mt-4">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
-                {isEditMode ? "Update Staff" : "Save Staff"}
+                {isEditMode ? "Update" : "Save"}
               </Button>
 
               <Button variant="secondary" onClick={() => navigate("/staff")}>

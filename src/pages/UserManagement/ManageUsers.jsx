@@ -77,7 +77,7 @@ const ManageUsers = () => {
             />
           )}
         </div>
-      )
+      ),
     },
   ];
   useEffect(() => {
@@ -131,6 +131,7 @@ const ManageUsers = () => {
             Add User
           </Button>
         </Card.Header>
+
 
         <Card.Body>
           <DataTable

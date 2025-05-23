@@ -1,22 +1,39 @@
+import React, { useState, useEffect } from "react";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import Footer from "./Footer";
+import { useIsMobile } from "../hooks/use-mobile";
 
-import React, { useState, useEffect } from 'react';
-import Header from './Header';
-import Sidebar from './Sidebar';
-import Footer from './Footer';
-import { useIsMobile } from '../hooks/use-mobile';
-
-const Layout = ({
-  children,
-  theme,
-  toggleTheme,
-}) => {
+const Layout = ({ children, theme, toggleTheme }) => {
   const isMobile = useIsMobile();
 
   // Separate states
   const [sidebarPinned, setSidebarPinned, setIsOpen] = useState(true);
   const [sidebarHovered, setSidebarHovered] = useState(false);
 
-  const isSidebarOpen = sidebarPinned || sidebarHovered;
+  // const isSidebarOpen = sidebarPinned || sidebarHovered;
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isOpen = isMobile ? isSidebarOpen : sidebarPinned;
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
+  }, [isMobile]);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setIsSidebarOpen((prev) => !prev);
+    } else {
+      setSidebarPinned((prev) => !prev);
+    }
+  };
+
+  const handleOverlayClick = () => {
+    if (isMobile && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   // Close sidebar by default on mobile
   useEffect(() => {
@@ -25,16 +42,6 @@ const Layout = ({
     }
   }, [isMobile]);
 
-  const toggleSidebar = () => {
-    setSidebarPinned((prev) => !prev);
-  };
-
-  const handleOverlayClick = () => {
-    if (isMobile && isSidebarOpen) {
-      setSidebarPinned(false);
-    }
-  };
-
   return (
     <div
       className={`main-layout ${
@@ -42,10 +49,11 @@ const Layout = ({
       }`}
     >
       <Sidebar
-        isOpen={isSidebarOpen}
+        isOpen={isOpen}
+        setIsOpen={isMobile ? setIsSidebarOpen : setSidebarPinned}
+        setSidebarOpen={setIsSidebarOpen}
         setHovering={setSidebarHovered}
         theme={theme}
-        setIsOpen={setIsOpen}
       />
 
       <div className="content-area">
