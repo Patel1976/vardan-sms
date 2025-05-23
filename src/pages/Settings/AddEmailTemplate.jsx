@@ -134,7 +134,7 @@ const AddEmailTemplate = () => {
     console.log("Form submitted with data:", formData);
 
     // Redirect back to templates list
-    navigate("/email-templates");
+    navigate("/email-template");
   };
 
   return (
@@ -155,7 +155,7 @@ const AddEmailTemplate = () => {
           <Button
             variant="secondary"
             className="ms-auto"
-            onClick={() => navigate("/email-templates")}
+            onClick={() => navigate("/email-template")}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="me-1" />
             Back
@@ -298,7 +298,7 @@ const AddEmailTemplate = () => {
 
               <Button
                 variant="secondary"
-                onClick={() => navigate("/email-templates")}
+                onClick={() => navigate("/email-template")}
               >
                 <FontAwesomeIcon icon={faTimes} className="me-1" />
                 Cancel

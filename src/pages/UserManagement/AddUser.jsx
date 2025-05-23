@@ -10,10 +10,12 @@ import {
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
+import axios from "axios";
 
 const AddUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_BASE_URL;
   const isEditMode = !!id;
 
   // Form state
@@ -24,84 +26,111 @@ const AddUser = () => {
     confirmPassword: "",
     phone: "",
     role: "",
-    status: "active",
   });
 
+  const [roles, setRoles] = useState([]);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [validated, setValidated] = useState(false);
 
-  // Sample roles for dropdown
-  const roles = [
-    { id: 1, name: "Administrator" },
-    { id: 2, name: "Manager" },
-    { id: 3, name: "Editor" },
-    { id: 4, name: "Viewer" },
-  ];
-
-  // Sample statuses for dropdown
-  const statuses = [
-    { value: "active", label: "Active" },
-    { value: "inactive", label: "Inactive" },
-    { value: "pending", label: "Pending" },
-    { value: "blocked", label: "Blocked" },
-  ];
-
-  // If in edit mode, load user data
   useEffect(() => {
     if (isEditMode) {
-      // In a real app, fetch user data from API using ID
-      // For demo, we're using mock data
-      const userData = {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "(123) 456-7890",
-        role: "Administrator",
-        status: "active",
-      };
-
-      setFormData({
-        ...formData,
-        ...userData,
-        password: "",
-        confirmPassword: "",
-      });
+      axios
+        .post(`${API_URL}get-user-by-id/${id}`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        .then((response) => {
+          const user = response.data.data;
+          setFormData((prevData) => ({
+            ...prevData,
+            name: user.name || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            role: user.role || "",
+            status: user.status || "active",
+            password: "",
+            confirmPassword: "",
+          }));
+        })
+        .catch((error) => {
+          console.error("Error loading user:", error);
+          alert("Failed to load user data.");
+        });
     }
-  }, [id, isEditMode]);
 
-  // Handle form input changes
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.post(`${API_URL}get-all-roles`, {},{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const fetchedRoles = response.data.data || [];
+        setRoles(fetchedRoles);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    fetchRoles();
+  }, [id, isEditMode, API_URL]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
-    });
+    }));
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const form = e.currentTarget;
 
-    // Check form validity
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
       return;
     }
 
-    // Check if passwords match in add mode
     if (!isEditMode && formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
-    // In a real app, send data to API
-    console.log("Form submitted with data:", formData);
+    const userPayload = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      role: formData.role,
+      ...(isEditMode ? {} : { password: formData.password }),
+    };
 
-    // Redirect back to users list
-    navigate("/users");
+    try {
+      if (isEditMode) {
+        await axios.put(`${API_URL}update-user/${id}`, userPayload, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        alert("User updated successfully");
+      } else {
+        await axios.post(`${API_URL}create-user`, userPayload, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        alert("User created successfully");
+      }
+      navigate("/users");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        "Failed to save user. Please try again.";
+      alert(msg);
+    }
   };
 
   return (
@@ -183,7 +212,9 @@ const AddUser = () => {
                       />
                       <Button
                         variant="outline-secondary"
-                        onClick={() => setPasswordVisible(!passwordVisible)}
+                        onClick={() =>
+                          setPasswordVisible((visible) => !visible)
+                        }
                       >
                         <FontAwesomeIcon
                           icon={passwordVisible ? faEyeSlash : faEye}
@@ -211,7 +242,7 @@ const AddUser = () => {
                       <Button
                         variant="outline-secondary"
                         onClick={() =>
-                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                          setConfirmPasswordVisible((visible) => !visible)
                         }
                       >
                         <FontAwesomeIcon
@@ -245,10 +276,10 @@ const AddUser = () => {
                 <Form.Group className="mb-3" controlId="userRole">
                   <Form.Label>Role</Form.Label>
                   <Form.Select
-                    required
                     name="role"
                     value={formData.role}
                     onChange={handleInputChange}
+                    required
                   >
                     <option value="">Select Role</option>
                     {roles.map((role) => (
@@ -258,32 +289,11 @@ const AddUser = () => {
                     ))}
                   </Form.Select>
                   <Form.Control.Feedback type="invalid">
-                    Please select a role.
+                    Role is required.
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
-
-            {isEditMode && (
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="userStatus">
-                    <Form.Label>Status</Form.Label>
-                    <Form.Select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      {statuses.map((status, index) => (
-                        <option key={index} value={status.value}>
-                          {status.label}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )}
 
             <div className="d-flex gap-2 mt-3">
               <Button variant="primary" type="submit">

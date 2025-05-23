@@ -82,7 +82,7 @@ const EmailTemplates = () => {
           <ActionButton 
             icon={faEdit} 
             variant="outline-primary" 
-            onClick={() => navigate(`/email-templates/edit/${template.id}`)} 
+            onClick={() => navigate(`/email-template/edit/${template.id}`)} 
             title="Edit Template"
           />
           <ActionButton 
@@ -109,7 +109,7 @@ const EmailTemplates = () => {
           <Button 
             variant="primary" 
             size="sm"
-            onClick={() => navigate('/email-templates/add')}
+            onClick={() => navigate('/email-template/add')}
           >
             <FontAwesomeIcon icon={faPlus} className="me-1" />
             Add Template

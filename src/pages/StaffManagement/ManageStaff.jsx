@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Badge } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,56 +12,14 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import StatusBadge from "../../components/StatusBadge";
+import axios from 'axios';
 
 const ManageStaff = () => {
   const navigate = useNavigate();
-  const [staffMembers, setStaffMembers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "(123) 456-7890",
-      department: "Marketing",
-      status: "active",
-      avatar: "user.jpg",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      phone: "(987) 654-3210",
-      department: "HR",
-      status: "active",
-      avatar: "user.jpg",
-    },
-    {
-      id: 3,
-      name: "Bob Johnson",
-      email: "bob.johnson@example.com",
-      phone: "(555) 123-4567",
-      department: "Sales",
-      status: "inactive",
-      avatar: "user.jpg",
-    },
-    {
-      id: 4,
-      name: "Alice Williams",
-      email: "alice.williams@example.com",
-      phone: "(333) 222-1111",
-      department: "Development",
-      status: "active",
-      avatar: "user.jpg",
-    },
-    {
-      id: 5,
-      name: "Charlie Brown",
-      email: "charlie.brown@example.com",
-      phone: "(444) 555-6666",
-      department: "Finance",
-      status: "active",
-      avatar: "user.jpg",
-    },
-  ]);
+  const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const [staffMembers, setStaffMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Delete staff handler
   const handleDeleteStaff = (staffId) => {
@@ -99,11 +57,6 @@ const ManageStaff = () => {
       ),
     },
     {
-      field: "status",
-      header: "Status",
-      render: (value) => <StatusBadge status={value} />,
-    },
-    {
       field: "actions",
       header: "Actions",
       render: (_, staff) => (
@@ -130,6 +83,38 @@ const ManageStaff = () => {
       ),
     },
   ];
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const res = await axios.get(`${API_URL_STAFF}get-all-staff-users`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (res.status === 200 && res.data.success === 1) {
+          const formattedStaff = res.data.data.map((staff) => ({
+            id: staff.id,
+            name: staff.name,
+            email: staff.email,
+            phone: staff.phone,
+            department: staff.department,
+            avatar: staff.avatar || "profile.jpg",
+          }));
+          setStaffMembers(formattedStaff);
+        }
+        else {
+          setError('Failed to load Staff Members');
+        }
+      } catch (error) {
+        console.error("Error fetching staff members:", error);
+        setError('An error occurred while fetching users');
+      }
+      finally {
+        setLoading(false);
+      }
+    };
+    fetchStaff();
+  }, []);
 
   return (
     <div className="manage-staff">

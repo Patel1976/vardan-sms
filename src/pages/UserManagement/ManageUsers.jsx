@@ -1,68 +1,48 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faPlus, 
-  faEdit, 
-  faTrashAlt, 
-  faUserShield 
+import {
+  faPlus,
+  faEdit,
+  faTrashAlt,
+  faUserShield
 } from '@fortawesome/free-solid-svg-icons';
 import PageTitle from '../../components/PageTitle';
 import DataTable from '../../components/DataTable';
 import ActionButton from '../../components/ActionButton';
 import StatusBadge from '../../components/StatusBadge';
+import axios from 'axios';
 
 const ManageUsers = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([
-    { 
-      id: 1, 
-      name: 'John Doe', 
-      email: 'john.doe@example.com', 
-      phone: '(123) 456-7890', 
-      role: 'Administrator',
-      status: 'active'
-    },
-    { 
-      id: 2, 
-      name: 'Jane Smith', 
-      email: 'jane.smith@example.com', 
-      phone: '(987) 654-3210', 
-      role: 'Manager',
-      status: 'active'
-    },
-    { 
-      id: 3, 
-      name: 'Bob Johnson', 
-      email: 'bob.johnson@example.com', 
-      phone: '(555) 123-4567', 
-      role: 'Editor',
-      status: 'inactive'
-    },
-    { 
-      id: 4, 
-      name: 'Alice Williams', 
-      email: 'alice.williams@example.com', 
-      phone: '(333) 222-1111', 
-      role: 'Viewer',
-      status: 'pending'
-    },
-    { 
-      id: 5, 
-      name: 'Charlie Brown', 
-      email: 'charlie.brown@example.com', 
-      phone: '(444) 555-6666', 
-      role: 'Manager',
-      status: 'blocked'
-    },
-  ]);
+  const API_URL = import.meta.env.VITE_BASE_URL;
+  const loggedInUserId = sessionStorage.getItem('LoggedInUserId');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Delete user handler
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== userId));
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+
+    try {
+      const res = await axios.delete(`${API_URL}delete-user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (res.status === 200 && res.data.success === 1) {
+        alert("User deleted successfully");
+        setUsers(users.filter(user => user.id !== userId));
+      } else {
+        alert(res.data.message || "Failed to delete user");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Error deleting user";
+      alert(msg);
     }
   };
 
@@ -72,56 +52,89 @@ const ManageUsers = () => {
     { field: 'email', header: 'Email' },
     { field: 'phone', header: 'Phone' },
     { field: 'role', header: 'Role' },
-    { 
-      field: 'status', 
+    {
+      field: 'status',
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
-    { 
-      field: 'actions', 
+    {
+      field: 'actions',
       header: 'Actions',
       render: (_, user) => (
         <div className="action-buttons">
-          <ActionButton 
-            icon={faEdit} 
-            variant="outline-primary" 
-            onClick={() => navigate(`/users/edit/${user.id}`)} 
+          <ActionButton
+            icon={faEdit}
+            variant="outline-primary"
+            onClick={() => navigate(`/users/edit/${user.id}`)}
             title="Edit User"
           />
-          <ActionButton 
-            icon={faTrashAlt} 
-            variant="outline-danger" 
-            onClick={() => handleDeleteUser(user.id)} 
-            title="Delete User"
-          />
+          {String(user.id) !== String(loggedInUserId) && (
+            <ActionButton
+              icon={faTrashAlt}
+              variant="outline-danger"
+              onClick={() => handleDeleteUser(user.id)}
+              title="Delete User"
+            />
+          )}
         </div>
       )
     },
   ];
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.post(`${API_URL}get-all-users`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (res.status === 200 && res.data.success === 1) {
+          const formattedUsers = res.data.data.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone || 'N/A',
+            role: user.user_roles?.length > 0 ? user.user_roles[0].name : 'N/A',
+            status: user.status ? 'active' : 'inactive'
+          }));
+          setUsers(formattedUsers);
+        } else {
+          setError('Failed to load users');
+        }
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        setError('An error occurred while fetching users');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   return (
     <div className="manage-users">
-      <PageTitle 
-        title="Manage Users" 
-        breadcrumbs={[{ text: 'User Management' }, { text: 'Manage Users' }]} 
+      <PageTitle
+        title="Manage Users"
+        breadcrumbs={[{ text: 'User Management' }, { text: 'Manage Users' }]}
       />
-      
+
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <span className="text-xl fw-semibold">User List</span>
-          <Button 
-            variant="primary" 
-            size="sm" 
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => navigate('/users/add')}
           >
             <FontAwesomeIcon icon={faPlus} className="me-1" />
             Add User
           </Button>
         </Card.Header>
-        
+
         <Card.Body>
-          <DataTable 
-            columns={columns} 
+          <DataTable
+            columns={columns}
             data={users}
           />
         </Card.Body>
