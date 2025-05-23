@@ -111,7 +111,7 @@ const ManageStaff = () => {
           <ActionButton
             icon={faEdit}
             variant="outline-primary"
-            onClick={() => navigate(`/staff/edit/${staff.id}`)}
+            onClick={() => navigate(`/staff/edit-staff/${staff.id}`)}
             title="Edit Staff"
           />
           <ActionButton
@@ -135,16 +135,16 @@ const ManageStaff = () => {
     <div className="manage-staff">
       <PageTitle
         title="Manage Staff"
-        breadcrumbs={[{ text: "Staff Management" }, { text: "Manage Staff" }]}
+        breadcrumbs={[{ text: "Manage Staff" }]}
       />
 
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <span className="text-xl fw-semibold">Staff List</span>
+          <span className="text-xl fw-semibold">Manage Staff</span>
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate("/staff/add")}
+            onClick={() => navigate("/staff/add-staff")}
           >
             <FontAwesomeIcon icon={faPlus} className="me-1" />
             Add Staff

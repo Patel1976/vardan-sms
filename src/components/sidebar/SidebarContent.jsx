@@ -55,7 +55,7 @@ const SidebarContent = ({
           isFullWidth={isOpen}
           submenuItems={[
             { path: "/staff", title: "Manage Staff" },
-            { path: "/work-journey", title: "Work Journey" },
+            { path: "/workjourney", title: "Work Journey" },
           ]}
           isMobile={isMobile}
           setIsOpen={setSidebarOpen}
@@ -71,7 +71,7 @@ const SidebarContent = ({
           isFullWidth={isOpen}
           submenuItems={[
             { path: "/emergency-logs", title: "Emergency Logs" },
-            { path: "/time-logs", title: "Time Logs" },
+            { path: "/timelogs", title: "Time Logs" },
           ]}
           isMobile={isMobile}
           setIsOpen={setSidebarOpen}

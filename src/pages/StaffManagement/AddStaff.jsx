@@ -77,7 +77,7 @@ const AddStaff = () => {
         position: "Manager",
         hireDate: "2023-01-15",
         status: "active",
-        profileImageUrl: "https://via.placeholder.com/150",
+        profileImageUrl: "",
       };
 
       setFormData(staffData);
@@ -130,7 +130,7 @@ const AddStaff = () => {
       <PageTitle
         title={isEditMode ? "Edit Staff" : "Add Staff"}
         breadcrumbs={[
-          { text: "Staff Management", link: "/staff" },
+          { text: "Manage Staff", link: "/staff" },
           { text: isEditMode ? "Edit Staff" : "Add Staff" },
         ]}
       />
@@ -138,7 +138,7 @@ const AddStaff = () => {
       <Card>
         <Card.Header className="d-flex align-items-center justify-content-between">
           <div className="text-xl fw-semibold">
-            {isEditMode ? "Edit Staff Member" : "Add New Staff Member"}
+            {isEditMode ? "Edit Staff" : "Add Staff"}
           </div>
           <Button
             variant="secondary"
@@ -153,7 +153,7 @@ const AddStaff = () => {
         <Card.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
             <Row>
-              <Col md={3} className="mb-4 text-center">
+              <Col md={12} className="mb-4 text-center">
                 <div
                   onClick={() =>
                     document.getElementById("profileImage").click()
@@ -185,7 +185,6 @@ const AddStaff = () => {
                       <div className="upload-label">Upload Photo</div>
                     </div>
                   )}
-
                   <div className="upload-hover"></div>
                 </div>
 
@@ -197,16 +196,15 @@ const AddStaff = () => {
                   style={{ display: "none" }}
                 />
               </Col>
-
-              <Col md={9}>
+              <Col md={12}>
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3" controlId="staffName">
-                      <Form.Label>Full Name</Form.Label>
+                      <Form.Label>Name</Form.Label>
                       <Form.Control
                         required
                         type="text"
-                        placeholder="Enter staff name"
+                        placeholder="Enter Name"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
@@ -223,7 +221,7 @@ const AddStaff = () => {
                       <Form.Control
                         required
                         type="email"
-                        placeholder="Enter email address"
+                        placeholder="Enter Email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
@@ -238,10 +236,10 @@ const AddStaff = () => {
                 <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3" controlId="staffPhone">
-                      <Form.Label>Phone</Form.Label>
+                      <Form.Label>Phone No.</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder="Enter phone number"
+                        placeholder="Enter Phone No."
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
@@ -250,12 +248,32 @@ const AddStaff = () => {
                   </Col>
 
                   <Col md={6}>
-                    <Form.Group className="mb-3" controlId="staffHireDate">
-                      <Form.Label>Hire Date</Form.Label>
+                    <Form.Group className="mb-3" controlId="staffDepartment">
+                      <Form.Label>Department</Form.Label>
+                      <Form.Select
+                        name="department"
+                        value={formData.department}
+                        onChange={handleInputChange}
+                      >
+                        <option value="" disabled hidden>
+                          Select Department
+                        </option>
+                        {departments.map((dept) => (
+                          <option key={dept.id} value={dept.name}>
+                            {dept.name}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col md={12}>
+                    <Form.Group className="mb-3" controlId="staffAddress">
+                      <Form.Label>Address</Form.Label>
                       <Form.Control
-                        type="date"
-                        name="hireDate"
-                        value={formData.hireDate}
+                        type="text"
+                        placeholder="Enter Address"
+                        name="address"
+                        value={formData.address}
                         onChange={handleInputChange}
                       />
                     </Form.Group>
@@ -264,32 +282,13 @@ const AddStaff = () => {
               </Col>
             </Row>
 
-            {/* <h5 className="mt-3 mb-3">
-              <b>Address Information</b>
-            </h5> */}
-
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-3" controlId="staffAddress">
-                  <Form.Label>Address</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter street address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
+            {/* <Row>
               <Col md={4}>
                 <Form.Group className="mb-3" controlId="staffCity">
                   <Form.Label>City</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter city"
+                    placeholder="Enter City"
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
@@ -322,49 +321,9 @@ const AddStaff = () => {
                   />
                 </Form.Group>
               </Col>
-            </Row>
+            </Row> */}
 
-            <h5 className="mt-3 mb-3">Employment Information</h5>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="staffDepartment">
-                  <Form.Label>Department</Form.Label>
-                  <Form.Select
-                    name="department"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.name}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="staffPosition">
-                  <Form.Label>Position</Form.Label>
-                  <Form.Select
-                    name="position"
-                    value={formData.position}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Position</option>
-                    {positions.map((pos) => (
-                      <option key={pos.id} value={pos.name}>
-                        {pos.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            {isEditMode && (
+            {/* {isEditMode && (
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3" controlId="staffStatus">
@@ -380,12 +339,12 @@ const AddStaff = () => {
                   </Form.Group>
                 </Col>
               </Row>
-            )}
+            )} */}
 
             <div className="d-flex gap-2 mt-4">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
-                {isEditMode ? "Update Staff" : "Save Staff"}
+                {isEditMode ? "Update" : "Save"}
               </Button>
 
               <Button variant="secondary" onClick={() => navigate("/staff")}>

@@ -109,7 +109,7 @@ const AddUser = () => {
       <PageTitle
         title={isEditMode ? "Edit User" : "Add User"}
         breadcrumbs={[
-          { text: "User Management", link: "/users" },
+          { text: "Manage Users", link: "/users" },
           { text: isEditMode ? "Edit User" : "Add User" },
         ]}
       />
@@ -117,7 +117,7 @@ const AddUser = () => {
       <Card>
         <Card.Header className="d-flex align-items-center justify-content-between">
           <div className="text-xl fw-semibold">
-            {isEditMode ? "Edit User" : "Add New User"}
+            {isEditMode ? "Edit User" : "Add User"}
           </div>
           <Button
             variant="secondary"
@@ -138,7 +138,7 @@ const AddUser = () => {
                   <Form.Control
                     required
                     type="text"
-                    placeholder="Enter full name"
+                    placeholder="Enter Name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -155,7 +155,7 @@ const AddUser = () => {
                   <Form.Control
                     required
                     type="email"
-                    placeholder="Enter email address"
+                    placeholder="Enter Email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -176,7 +176,7 @@ const AddUser = () => {
                       <Form.Control
                         required
                         type={passwordVisible ? "text" : "password"}
-                        placeholder="Enter password"
+                        placeholder="Enter Password"
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
@@ -203,7 +203,7 @@ const AddUser = () => {
                       <Form.Control
                         required
                         type={confirmPasswordVisible ? "text" : "password"}
-                        placeholder="Confirm password"
+                        placeholder="Enter Confirm Password"
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
@@ -230,10 +230,10 @@ const AddUser = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3" controlId="userPhone">
-                  <Form.Label>Phone</Form.Label>
+                  <Form.Label>Phone No.</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter phone number"
+                    placeholder="Enter Phone No."
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -250,7 +250,9 @@ const AddUser = () => {
                     value={formData.role}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select Role</option>
+                    <option value="" disabled hidden>
+                      Select Role
+                    </option>
                     {roles.map((role) => (
                       <option key={role.id} value={role.name}>
                         {role.name}
@@ -264,7 +266,7 @@ const AddUser = () => {
               </Col>
             </Row>
 
-            {isEditMode && (
+            {/* {isEditMode && (
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3" controlId="userStatus">
@@ -283,12 +285,12 @@ const AddUser = () => {
                   </Form.Group>
                 </Col>
               </Row>
-            )}
+            )} */}
 
             <div className="d-flex gap-2 mt-3">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
-                {isEditMode ? "Update User" : "Save User"}
+                {isEditMode ? "Update" : "Save"}
               </Button>
 
               <Button variant="secondary" onClick={() => navigate("/users")}>

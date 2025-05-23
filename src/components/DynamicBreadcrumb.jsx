@@ -9,24 +9,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHouse } from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faAnglesRight } from "@fortawesome/free-solid-svg-icons";
 
-const routeNameMap = {
-  "": "Home",
-  users: "Manage Users",
-  add: "Add User",
-  edit: "Edit User",
-  roles: "Manage Roles",
-  permissions: "Role Permissions",
-  staff: "Manage Staff",
-  "work-journey": "Work Journey",
-  "emergency-logs": "Emergency Logs",
-  "time-logs": "Time Logs",
-  "email-templates": "Email Templates",
-  profile: "My Profile",
-};
-
-const DynamicBreadcrumb = () => {
+const DynamicBreadcrumb = ({ breadcrumbs = [] }) => {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -46,27 +31,22 @@ const DynamicBreadcrumb = () => {
             </BreadcrumbLink>
           </BreadcrumbItem>
 
-          {pathnames.map((segment, index) => {
-            if (/^\d+$/.test(segment)) return null;
-
-            const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
-            const isLast = index === pathnames.length - 1;
-            const title = routeNameMap[segment] || segment;
-
+          {breadcrumbs.map((crumb, index) => {
+            const isLast = index === breadcrumbs.length - 1;
             return (
               <React.Fragment key={index}>
                 <BreadcrumbSeparator className="breadcrumb-separator">
-                  /
+                  <FontAwesomeIcon icon={faAnglesRight} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   {isLast ? (
                     <BreadcrumbPage className="breadcrumb-page">
-                      {title}
+                      {crumb.text}
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link to={routeTo} className="breadcrumb-link">
-                        {title}
+                      <Link to={crumb.link} className="breadcrumb-link">
+                        {crumb.text}
                       </Link>
                     </BreadcrumbLink>
                   )}
