@@ -282,65 +282,6 @@ const AddStaff = () => {
               </Col>
             </Row>
 
-            {/* <Row>
-              <Col md={4}>
-                <Form.Group className="mb-3" controlId="staffCity">
-                  <Form.Label>City</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter City"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={4}>
-                <Form.Group className="mb-3" controlId="staffState">
-                  <Form.Label>State</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={4}>
-                <Form.Group className="mb-3" controlId="staffZipCode">
-                  <Form.Label>Zip Code</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter zip code"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-            </Row> */}
-
-            {/* {isEditMode && (
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="staffStatus">
-                    <Form.Label>Status</Form.Label>
-                    <Form.Select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )} */}
-
             <div className="d-flex gap-2 mt-4">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />

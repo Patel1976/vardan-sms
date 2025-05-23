@@ -158,21 +158,6 @@ const TimeLogs = () => {
     {
       field: "workLocation",
       header: "Location",
-      render: (value) => {
-        let badgeVariant = "primary";
-
-        if (value === "Remote") {
-          badgeVariant = "info";
-        } else if (value === "Client Site") {
-          badgeVariant = "warning";
-        }
-
-        return (
-          <Badge bg={badgeVariant} className="text-white">
-            {value}
-          </Badge>
-        );
-      },
     },
     { field: "notes", header: "Notes" },
   ];

@@ -26,7 +26,16 @@ const SidebarContent = ({
       <ul className="nav flex-column">
         {/* Dashboard */}
         <li className="nav-item">
-          <NavLink to="/" className="nav-link text-sidebar-foreground" end>
+          <NavLink
+            to="/"
+            className="nav-link text-sidebar-foreground"
+            end
+            onClick={() => {
+              if (isMobile) {
+                setSidebarOpen(false);
+              }
+            }}
+          >
             <FontAwesomeIcon icon={faTachometerAlt} />
             {isOpen && <span className="nav-text ms-2">Dashboard</span>}
           </NavLink>

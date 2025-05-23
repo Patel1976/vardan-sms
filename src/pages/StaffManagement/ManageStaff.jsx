@@ -92,11 +92,6 @@ const ManageStaff = () => {
     {
       field: "department",
       header: "Department",
-      render: (value) => (
-        <Badge bg="info" className="text-white">
-          {value}
-        </Badge>
-      ),
     },
     {
       field: "status",

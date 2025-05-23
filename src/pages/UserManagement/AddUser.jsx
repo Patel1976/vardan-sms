@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, Form, Button, Row, Col, InputGroup } from "react-bootstrap";
+import {
+  Card,
+  Form,
+  Button,
+  Row,
+  Col,
+  InputGroup,
+  Nav,
+  Tab,
+} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
@@ -8,6 +17,8 @@ import {
   faSave,
   faTimes,
   faArrowLeft,
+  faUser,
+  faKey,
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
 
@@ -16,7 +27,6 @@ const AddUser = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,7 +41,6 @@ const AddUser = () => {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [validated, setValidated] = useState(false);
 
-  // Sample roles for dropdown
   const roles = [
     { id: 1, name: "Administrator" },
     { id: 2, name: "Manager" },
@@ -39,7 +48,6 @@ const AddUser = () => {
     { id: 4, name: "Viewer" },
   ];
 
-  // Sample statuses for dropdown
   const statuses = [
     { value: "active", label: "Active" },
     { value: "inactive", label: "Inactive" },
@@ -47,11 +55,8 @@ const AddUser = () => {
     { value: "blocked", label: "Blocked" },
   ];
 
-  // If in edit mode, load user data
   useEffect(() => {
     if (isEditMode) {
-      // In a real app, fetch user data from API using ID
-      // For demo, we're using mock data
       const userData = {
         name: "John Doe",
         email: "john.doe@example.com",
@@ -59,7 +64,6 @@ const AddUser = () => {
         role: "Administrator",
         status: "active",
       };
-
       setFormData({
         ...formData,
         ...userData,
@@ -67,42 +71,163 @@ const AddUser = () => {
         confirmPassword: "",
       });
     }
-  }, [id, isEditMode]);
+  }, [id]);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const form = e.currentTarget;
 
-    // Check form validity
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
       return;
     }
 
-    // Check if passwords match in add mode
     if (!isEditMode && formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
-    // In a real app, send data to API
     console.log("Form submitted with data:", formData);
-
-    // Redirect back to users list
     navigate("/users");
   };
+
+  const renderGeneralInfoForm = () => (
+    <>
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3" controlId="userName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              placeholder="Enter Name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Name is required.
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3" controlId="userEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              required
+              type="email"
+              placeholder="Enter Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please provide a valid email.
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3" controlId="userPhone">
+            <Form.Label>Phone No.</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter Phone No."
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+            />
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3" controlId="userRole">
+            <Form.Label>Role</Form.Label>
+            <Form.Select
+              required
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+            >
+              <option value="" disabled hidden>
+                Select Role
+              </option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.name}>
+                  {role.name}
+                </option>
+              ))}
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">
+              Please select a role.
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+      </Row>
+    </>
+  );
+
+  const renderPasswordForm = () => (
+    <Row>
+      <Col md={6}>
+        <Form.Group className="mb-3" controlId="userPassword">
+          <Form.Label>Password</Form.Label>
+          <InputGroup>
+            <Form.Control
+              required
+              type={passwordVisible ? "text" : "password"}
+              placeholder="Enter Password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+            />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setPasswordVisible(!passwordVisible)}
+            >
+              <FontAwesomeIcon icon={passwordVisible ? faEyeSlash : faEye} />
+            </Button>
+            <Form.Control.Feedback type="invalid">
+              Password is required.
+            </Form.Control.Feedback>
+          </InputGroup>
+        </Form.Group>
+      </Col>
+      <Col md={6}>
+        <Form.Group className="mb-3" controlId="userConfirmPassword">
+          <Form.Label>Confirm Password</Form.Label>
+          <InputGroup>
+            <Form.Control
+              required
+              type={confirmPasswordVisible ? "text" : "password"}
+              placeholder="Confirm Password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+            />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+            >
+              <FontAwesomeIcon
+                icon={confirmPasswordVisible ? faEyeSlash : faEye}
+              />
+            </Button>
+            <Form.Control.Feedback type="invalid">
+              Please confirm the password.
+            </Form.Control.Feedback>
+          </InputGroup>
+        </Form.Group>
+      </Col>
+    </Row>
+  );
 
   return (
     <div className="add-user">
@@ -131,168 +256,43 @@ const AddUser = () => {
 
         <Card.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="userName">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    required
-                    type="text"
-                    placeholder="Enter Name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Name is required.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="userEmail">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    required
-                    type="email"
-                    placeholder="Enter Email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Please provide a valid email.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            {!isEditMode && (
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="userPassword">
-                    <Form.Label>Password</Form.Label>
-                    <InputGroup>
-                      <Form.Control
-                        required
-                        type={passwordVisible ? "text" : "password"}
-                        placeholder="Enter Password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                      />
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => setPasswordVisible(!passwordVisible)}
-                      >
-                        <FontAwesomeIcon
-                          icon={passwordVisible ? faEyeSlash : faEye}
-                        />
-                      </Button>
-                      <Form.Control.Feedback type="invalid">
-                        Password is required.
-                      </Form.Control.Feedback>
-                    </InputGroup>
-                  </Form.Group>
-                </Col>
-
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="userConfirmPassword">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <InputGroup>
-                      <Form.Control
-                        required
-                        type={confirmPasswordVisible ? "text" : "password"}
-                        placeholder="Enter Confirm Password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                      />
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() =>
-                          setConfirmPasswordVisible(!confirmPasswordVisible)
-                        }
-                      >
-                        <FontAwesomeIcon
-                          icon={confirmPasswordVisible ? faEyeSlash : faEye}
-                        />
-                      </Button>
-                      <Form.Control.Feedback type="invalid">
-                        Please confirm the password.
-                      </Form.Control.Feedback>
-                    </InputGroup>
-                  </Form.Group>
-                </Col>
-              </Row>
+            {isEditMode ? (
+              <Tab.Container defaultActiveKey="general">
+                <Nav variant="tabs" className="mb-3">
+                  <Nav.Item>
+                    <Nav.Link eventKey="general" className="border-0">
+                      <FontAwesomeIcon icon={faUser} className="me-1" />
+                      User Details
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="password" className="border-0">
+                      <FontAwesomeIcon icon={faKey} className="me-1" />
+                      Change Password
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+                <Tab.Content>
+                  <Tab.Pane eventKey="general">
+                    {renderGeneralInfoForm()}
+                  </Tab.Pane>
+                  <Tab.Pane eventKey="password">
+                    {renderPasswordForm()}
+                  </Tab.Pane>
+                </Tab.Content>
+              </Tab.Container>
+            ) : (
+              <>
+                {renderGeneralInfoForm()}
+                {renderPasswordForm()}
+              </>
             )}
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="userPhone">
-                  <Form.Label>Phone No.</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter Phone No."
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="userRole">
-                  <Form.Label>Role</Form.Label>
-                  <Form.Select
-                    required
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                  >
-                    <option value="" disabled hidden>
-                      Select Role
-                    </option>
-                    {roles.map((role) => (
-                      <option key={role.id} value={role.name}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    Please select a role.
-                  </Form.Control.Feedback>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            {/* {isEditMode && (
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3" controlId="userStatus">
-                    <Form.Label>Status</Form.Label>
-                    <Form.Select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      {statuses.map((status, index) => (
-                        <option key={index} value={status.value}>
-                          {status.label}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )} */}
 
             <div className="d-flex gap-2 mt-3">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
                 {isEditMode ? "Update" : "Save"}
               </Button>
-
               <Button variant="secondary" onClick={() => navigate("/users")}>
                 <FontAwesomeIcon icon={faTimes} className="me-1" />
                 Cancel
