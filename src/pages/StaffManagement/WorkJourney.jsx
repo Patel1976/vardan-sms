@@ -103,27 +103,27 @@ const WorkJourney = () => {
     <div className="work-journey">
       <PageTitle
         title="Work Journey"
-        breadcrumbs={[{ text: "Staff Management" }, { text: "Work Journey" }]}
+        breadcrumbs={[{ text: "Work Journey" }]}
       />
 
       {!showMap ? (
         <Card>
-          <Card.Header className="text-xl fw-semibold">
-            Select Staff and Date Range
-          </Card.Header>
+          <Card.Header className="text-xl fw-semibold">Work Logs</Card.Header>
 
           <Card.Body>
             <Form onSubmit={handleSubmit}>
               <Row>
                 <Col md={4}>
                   <Form.Group className="mb-3" controlId="selectStaff">
-                    <Form.Label>Select Staff</Form.Label>
+                    <Form.Label>Select a Staff</Form.Label>
                     <Form.Select
                       name="staff"
                       value={selectedStaff}
                       onChange={handleInputChange}
                     >
-                      <option value="">Choose a staff member</option>
+                      <option value="" disabled hidden>
+                        Search Staff by Name...
+                      </option>
                       {staffList.map((staff) => (
                         <option key={staff.id} value={staff.id}>
                           {staff.name}

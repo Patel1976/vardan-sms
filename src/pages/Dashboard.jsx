@@ -6,6 +6,8 @@ import {
   faUserTie,
   faClipboardList,
   faExclamationTriangle,
+  faGaugeHigh,
+  faSmile,
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../components/PageTitle";
 import CountUp from "react-countup";
@@ -53,6 +55,16 @@ const Dashboard = () => {
     <div className="dashboard">
       <PageTitle title="Dashboard" />
 
+      <Row>
+        <Col lg={12}>
+          <Card className="shadow">
+            <Card.Header className="py-3">
+              <h6 className="text-xl m-0 font-weight-bold text-s">Dashboard</h6>
+              <h6 className="mt-2 dash-label">Welcome to the admin panel !!</h6>
+            </Card.Header>
+          </Card>
+        </Col>
+      </Row>
       <Row>
         {stats.map((stat, index) => (
           <Col xl={3} md={6} className="mb-4" key={index}>

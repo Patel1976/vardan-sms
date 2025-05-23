@@ -142,15 +142,15 @@ const AddEmailTemplate = () => {
       <PageTitle
         title={isEditMode ? "Edit Email Template" : "Add Email Template"}
         breadcrumbs={[
-          { text: "Settings", link: "/email-templates" },
-          { text: isEditMode ? "Edit Template" : "Add Template" },
+          { text: "Email Templates", link: "/email-templates" },
+          { text: isEditMode ? "Edit Email Template" : "Add Email Template" },
         ]}
       />
 
       <Card>
         <Card.Header className="d-flex align-items-center justify-content-between">
           <div className="text-xl fw-semibold">
-            {isEditMode ? "Edit Email Template" : "Add New Email Template"}
+            {isEditMode ? "Edit Email Template" : "Add Email Template"}
           </div>
           <Button
             variant="secondary"
@@ -171,7 +171,7 @@ const AddEmailTemplate = () => {
                   <Form.Control
                     required
                     type="text"
-                    placeholder="Enter template name"
+                    placeholder="Enter Template Name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -191,7 +191,7 @@ const AddEmailTemplate = () => {
                     <Form.Control
                       required
                       type="text"
-                      placeholder="Enter email subject"
+                      placeholder="Enter Email Subject"
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
@@ -291,9 +291,9 @@ const AddEmailTemplate = () => {
             </Accordion>
 
             <div className="d-flex gap-2 mt-4">
-              <Button variant="primary" type="submit" disabled={!formData.body}>
+              <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
-                {isEditMode ? "Update Template" : "Save Template"}
+                {isEditMode ? "Update" : "Save"}
               </Button>
 
               <Button

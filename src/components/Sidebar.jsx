@@ -60,8 +60,9 @@ const Sidebar = ({ isOpen, setIsOpen, setSidebarOpen, setHovering, theme }) => {
     <aside
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`sidebar bg-sidebar text-sidebar-foreground ${!isOpen ? "mini" : ""
-        } ${isMobile && isOpen ? "mobile-open" : ""}`}
+      className={`sidebar bg-sidebar text-sidebar-foreground ${
+        !isOpen ? "mini" : ""
+      } ${isMobile && isOpen ? "mobile-open" : ""}`}
     >
       <SidebarHeader
         isOpen={isOpen}
