@@ -84,10 +84,6 @@ const AppContent = () => {
           <Route path="/users" element={<ProtectedRoute element={<ManageUsers />} />} />
           <Route path="/users/add" element={<ProtectedRoute element={<AddUser />} />} />
           <Route path="/users/edit/:id" element={<ProtectedRoute element={<AddUser />} />} />
-          <Route path="/roles" element={<ProtectedRoute element={<ManageRoles />} />} />
-          <Route path="/roles/add" element={<ProtectedRoute element={<AddRole />} />} />
-          <Route path="/roles/edit/:id" element={<ProtectedRoute element={<AddRole />} />} />
-          <Route path="/roles/permissions/:id" element={<ProtectedRoute element={<RolePermissions />} />} />
           <Route path="/staff" element={<ProtectedRoute element={<ManageStaff />} />} />
           <Route path="/staff/add" element={<ProtectedRoute element={<AddStaff />} />} />
           <Route path="/staff/edit/:id" element={<ProtectedRoute element={<AddStaff />} />} />
