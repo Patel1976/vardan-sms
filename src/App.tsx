@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, FC } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Navigate  } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Layout from './components/Layout';
@@ -25,7 +25,8 @@ import NotFound from './pages/NotFound';
 
 const AppContent = () => {
   const location = useLocation();
-    const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [theme, setTheme] = useState('light');
 
@@ -43,6 +44,21 @@ const AppContent = () => {
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
   }, [theme]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const emailSaved = localStorage.getItem('email');
+    const publicRoutes = ['/login', '/lock-screen'];
+
+    if (!token && !publicRoutes.includes(location.pathname)) {
+      if (emailSaved) {
+        navigate('/lock-screen', { replace: true });
+      } else {
+        alert('You are not authenticated. Please log in.');
+        navigate('/login', { replace: true });
+      }
+    }
+  }, [location.pathname]);
 
   if (isAuthPage) {
     return (
@@ -82,11 +98,11 @@ const AppContent = () => {
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           <Route path="/users" element={<ProtectedRoute element={<ManageUsers />} />} />
-          <Route path="/users/add" element={<ProtectedRoute element={<AddUser />} />} />
-          <Route path="/users/edit/:id" element={<ProtectedRoute element={<AddUser />} />} />
+          <Route path="/users/add-user" element={<ProtectedRoute element={<AddUser />} />} />
+          <Route path="/users/edit-user/:id" element={<ProtectedRoute element={<AddUser />} />} />
           <Route path="/staff" element={<ProtectedRoute element={<ManageStaff />} />} />
-          <Route path="/staff/add" element={<ProtectedRoute element={<AddStaff />} />} />
-          <Route path="/staff/edit/:id" element={<ProtectedRoute element={<AddStaff />} />} />
+          <Route path="/staff/add-staff" element={<ProtectedRoute element={<AddStaff />} />} />
+          <Route path="/staff/edit-staff/:id" element={<ProtectedRoute element={<AddStaff />} />} />
           <Route path="/workjourney" element={<ProtectedRoute element={<WorkJourney />} />} />
           <Route path="/emergency-logs" element={<ProtectedRoute element={<EmergencyLogs />} />} />
           <Route path="/timelogs" element={<ProtectedRoute element={<TimeLogs />} />} />

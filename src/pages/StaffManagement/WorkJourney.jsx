@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,48 +13,55 @@ import {
   Polyline,
 } from "@react-google-maps/api";
 import PageTitle from "../../components/PageTitle";
+import searchStaff from "../../components/searchStaff";
+import axios from "axios";
 
 const WorkJourney = () => {
+  const [staffList, setStaffList] = useState([]);
+  const [staffSearch, setStaffSearch] = useState("");
   const [selectedStaff, setSelectedStaff] = useState("");
-  const [dateRange, setDateRange] = useState({
-    fromDate: "",
-    toDate: "",
-  });
+  const [dateRange, setDateRange] = useState({ fromDate: "", toDate: "" });
   const [showMap, setShowMap] = useState(false);
+  const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
 
-  // Sample staff list
-  const staffList = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-    { id: 3, name: "Bob Johnson" },
-    { id: 4, name: "Alice Williams" },
-    { id: 5, name: "Charlie Brown" },
-  ];
+  // Fetch staff on staffSearch change (with debounce)
+  useEffect(() => {
+    const fetchStaff = async () => {
+      if (staffSearch.trim() === "") {
+        setStaffList([]);
+        return;
+      }
 
-  // Sample journey path (would come from API in real app)
-  const journeyPath = [
-    { lat: 40.712776, lng: -74.005974, time: "09:00 AM" }, // New York
-    { lat: 40.73061, lng: -73.935242, time: "10:30 AM" }, // Brooklyn
-    { lat: 40.758896, lng: -73.98513, time: "12:15 PM" }, // Manhattan
-    { lat: 40.742054, lng: -73.769417, time: "02:45 PM" }, // Queens
-    { lat: 40.837048, lng: -73.865433, time: "04:30 PM" }, // Bronx
-  ];
+      try {
+        const response = await axios.get(`${API_URL_STAFF}search-staff`, {
+          params: { query: staffSearch },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-  // Map center (avg of all points)
-  const mapCenter = {
-    lat:
-      journeyPath.reduce((sum, point) => sum + point.lat, 0) /
-      journeyPath.length,
-    lng:
-      journeyPath.reduce((sum, point) => sum + point.lng, 0) /
-      journeyPath.length,
-  };
+        if (response.data.success) {
+          setStaffList(response.data.staff);
+        } else {
+          setStaffList([]);
+        }
+      } catch (error) {
+        console.error("Error fetching staff:", error);
+        setStaffList([]);
+      }
+    };
+
+    const debounceFetch = setTimeout(fetchStaff, 300);
+    return () => clearTimeout(debounceFetch);
+  }, [staffSearch]);
 
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "staff") {
+    if (name === "staffSearch") {
+      setStaffSearch(value);
+    } else if (name === "staff") {
       setSelectedStaff(value);
       setShowMap(false);
     } else {
@@ -84,7 +91,7 @@ const WorkJourney = () => {
 
   // Load Google Maps JavaScript API
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY", // Replace with your API key
+    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
     libraries: ["places"],
   });
 
@@ -116,20 +123,15 @@ const WorkJourney = () => {
                 <Col md={4}>
                   <Form.Group className="mb-3" controlId="selectStaff">
                     <Form.Label>Select a Staff</Form.Label>
-                    <Form.Select
-                      name="staff"
-                      value={selectedStaff}
-                      onChange={handleInputChange}
-                    >
-                      <option value="" disabled hidden>
-                        Search Staff by Name...
-                      </option>
-                      {staffList.map((staff) => (
-                        <option key={staff.id} value={staff.id}>
-                          {staff.name}
-                        </option>
-                      ))}
-                    </Form.Select>
+                    <SearchBar
+                      token={token}
+                      staffName={
+                        selectedStaff
+                          ? { value: selectedStaff.id, label: selectedStaff.name }
+                          : null
+                      }
+                      onSelectedOptionsChange={(selected) => setSelectedStaff(selected)}
+                    />
                   </Form.Group>
                 </Col>
 
@@ -176,8 +178,8 @@ const WorkJourney = () => {
                 <strong>
                   {selectedStaff
                     ? staffList.find(
-                        (s) => s.id.toString() === selectedStaff.toString()
-                      )?.name
+                      (s) => s.id.toString() === selectedStaff.toString()
+                    )?.name
                     : "All Staff"}
                 </strong>
               </div>

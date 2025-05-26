@@ -30,21 +30,15 @@ const AddStaff = () => {
     name: "",
     email: "",
     phone: "",
+    mpin: "",
     address: "",
+    status: true,
     department: "",
-    profileImage: null,
-    profileImageUrl: "",
+    profileImageBase64: "",
+    profileImageFile: null,
   });
 
   const [validated, setValidated] = useState(false);
-
-  // const departments = [
-  //   { id: 1, name: "Marketing" },
-  //   { id: 2, name: "HR" },
-  //   { id: 3, name: "Sales" },
-  //   { id: 4, name: "Development" },
-  //   { id: 5, name: "Finance" },
-  // ];
 
   useEffect(() => {
     if (isEditMode) {
@@ -61,12 +55,15 @@ const AddStaff = () => {
           );
           const staffData = response.data.data;
           setFormData({
-            name: staffData.name,
-            email: staffData.email,
-            phone: staffData.phone,
-            address: staffData.address,
-            department: staffData.department,
-            profileImageUrl: staffData.profileImageUrl,
+            name: staffData.name || "",
+            email: staffData.email || "",
+            phone: staffData.phone || "",
+            mpin: staffData.mpin || "",
+            address: staffData.address || "",
+            status: staffData.status ?? true,
+            department: staffData.department || "",
+            profileImageBase64: staffData.image || "",
+            profileImageFile: null,
           });
         } catch (error) {
           console.error("Error fetching staff data:", error);
@@ -79,20 +76,28 @@ const AddStaff = () => {
 
   // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   // Handle profile image change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImageFile: file,
+      }));
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFormData({ ...formData, profileImageUrl: event.target.result });
+        setFormData((prev) => ({
+          ...prev,
+          profileImageBase64: event.target.result.split(",")[1],
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -108,36 +113,41 @@ const AddStaff = () => {
       return;
     }
 
-    const staffPayload = {
+    const payload = {
       name: formData.name,
-      email: formData.email,
+      email: formData.email || null,
       phone: formData.phone,
+      mpin: formData.mpin || null,
       address: formData.address,
-      department: formData.department,
-      profileImageUrl: formData.profileImageUrl,
+      status: formData.status,
+      department: formData.department || null,
+      ...(formData.profileImageBase64 && { image: formData.profileImageBase64 }),
     };
-    try {
-      if (isEditMode) {
-        axios.put(`${API_URL_STAFF}update-staff-user/${id}`, staffPayload, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        alert("Staff updated successfully");
+    const submitForm = async () => {
+      try {
+        if (isEditMode) {
+          axios.put(`${API_URL_STAFF}update-staff-user/${id}`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          alert("Staff updated successfully");
+        }
+        else {
+          axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          alert("Staff added successfully");
+        }
+        navigate("/staff");
+      } catch (err) {
+        const msg = err.response?.data?.message || "Error saving staff";
+        alert(msg);
       }
-      else{
-        axios.post(`${API_URL_STAFF}create-staff-user`, staffPayload, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        alert("Staff added successfully");
-      }
-      navigate("/staff");
-    } catch (err) {
-      const msg = err.response?.data?.message || "Error saving staff";
-      alert(msg);
-    }
+    };
+    submitForm();
   };
 
   return (
@@ -181,9 +191,9 @@ const AddStaff = () => {
                   }}
                   className="upload-profile"
                 >
-                  {formData.profileImageUrl ? (
+                  {formData.profileImageBase64 ? (
                     <Image
-                      src={formData.profileImageUrl}
+                      src={`data:image/jpeg;base64,${formData.profileImageBase64}`}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -264,10 +274,6 @@ const AddStaff = () => {
                 </Row>
               </Col>
             </Row>
-
-            {/* <h5 className="mt-3 mb-3">
-              <b>Address Information</b>
-            </h5> */}
 
             <Row>
               <Col md={12}>

@@ -16,10 +16,8 @@ const LockScreen = () => {
       setError("Password is required");
       return;
     }
-
-    // In a real app, you would validate the password here
     console.log("Unlocking with password:", password);
-    navigate("/"); // Redirect to dashboard on successful unlock
+    navigate("/");
   };
 
   return (

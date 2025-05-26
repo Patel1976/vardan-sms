@@ -22,9 +22,24 @@ const ManageStaff = () => {
   const [error, setError] = useState('');
 
   // Delete staff handler
-  const handleDeleteStaff = (staffId) => {
-    if (window.confirm("Are you sure you want to delete this staff member?")) {
-      setStaffMembers(staffMembers.filter((staff) => staff.id !== staffId));
+  const handleDeleteStaff = async (staffId) => {
+    if (!window.confirm("Are you sure you want to delete this staff member?")) return;
+    try{
+      const res = await axios.delete(`${API_URL_STAFF}delete-staff-user/${staffId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+      if (res.status === 200 && res.data.success === 1) {
+        alert("Staff member deleted successfully");
+        setStaffMembers(staffMembers.filter(staff => staff.id !== staffId));
+      } else {
+        alert(res.data.message || "Failed to delete staff member");
+      }
+    }
+    catch (err) {
+      const msg = err.response?.data?.message || "Error deleting staff member";
+      alert(msg);
     }
   };
 
@@ -93,7 +108,9 @@ const ManageStaff = () => {
             email: staff.email,
             phone: staff.phone,
             department: staff.department,
-            avatar: staff.avatar || "profile.jpg",
+            avatar: staff.image
+              ? `data:image/jpeg;base64,${staff.image}`
+              : "profile.jpg",
           }));
           setStaffMembers(formattedStaff);
         }

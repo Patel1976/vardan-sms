@@ -65,7 +65,7 @@ const ManageUsers = () => {
           <ActionButton
             icon={faEdit}
             variant="outline-primary"
-            onClick={() => navigate(`/users/edit/${user.id}`)}
+            onClick={() => navigate(`/users/edit-user/${user.id}`)}
             title="Edit User"
           />
           {String(user.id) !== String(loggedInUserId) && (
@@ -125,7 +125,7 @@ const ManageUsers = () => {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate('/users/add')}
+            onClick={() => navigate('/users/add-user')}
           >
             <FontAwesomeIcon icon={faPlus} className="me-1" />
             Add User
