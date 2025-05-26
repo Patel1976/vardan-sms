@@ -10,11 +10,9 @@ const Layout = ({ children, theme, toggleTheme }) => {
   // Separate states
   const [sidebarPinned, setSidebarPinned, setIsOpen] = useState(true);
   const [sidebarHovered, setSidebarHovered] = useState(false);
-
-  // const isSidebarOpen = sidebarPinned || sidebarHovered;
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const isOpen = isMobile ? isSidebarOpen : sidebarPinned;
+  const isOpen = isMobile ? isSidebarOpen : sidebarPinned || sidebarHovered;
+
   useEffect(() => {
     if (isMobile) {
       setIsSidebarOpen(false);
