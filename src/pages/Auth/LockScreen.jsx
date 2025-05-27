@@ -11,15 +11,17 @@ const LockScreen = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!password) {
       setError("Password is required");
       return;
     }
-
-    // In a real app, you would validate the password here
-    console.log("Unlocking with password:", password);
-    navigate("/"); // Redirect to dashboard on successful unlock
+    const savedPassword = sessionStorage.getItem("password");
+    if (password === savedPassword) {
+      console.log("Unlocked successfully");
+      navigate("/dashboard");
+    } else {
+      setError("Incorrect password");
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, Form, Button, Row, Col, Modal, Image } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,96 +11,26 @@ import {
 import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
+import SearchStaff from "../../components/searchStaff";
+import axios from 'axios';
 
 const EmergencyLogs = () => {
-  // State for filter and modal
+  const navigate = useNavigate();
+  const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const token = localStorage.getItem("token");
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   const [filterData, setFilterData] = useState({
-    fromDate: "",
-    toDate: "",
-    staffId: "",
+    fromDate: '',
+    toDate: '',
+    staffId: '',
   });
 
+  const [staffList, setStaffList] = useState([]);
   const [showLogModal, setShowLogModal] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
-
-  // Sample staff list
-  const staffList = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Jane Smith" },
-    { id: 3, name: "Bob Johnson" },
-    { id: 4, name: "Alice Williams" },
-    { id: 5, name: "Charlie Brown" },
-  ];
-
-  // Sample emergency logs
-  const [logs, setLogs] = useState([
-    {
-      id: 1,
-      staffId: 1,
-      staffName: "John Doe",
-      date: "2023-06-15",
-      time: "14:30",
-      type: "Medical",
-      location: "123 Main St, New York",
-      description: "Staff member reported feeling unwell during work hours.",
-      images: ["https://via.placeholder.com/600/771796"],
-      status: "resolved",
-    },
-    {
-      id: 2,
-      staffId: 2,
-      staffName: "Jane Smith",
-      date: "2023-06-20",
-      time: "10:15",
-      type: "Safety",
-      location: "456 Elm St, Boston",
-      description: "Reported unsafe equipment at client site.",
-      images: [
-        "https://via.placeholder.com/600/d32776",
-        "https://via.placeholder.com/600/f66b97",
-      ],
-      status: "pending",
-    },
-    {
-      id: 3,
-      staffId: 3,
-      staffName: "Bob Johnson",
-      date: "2023-07-05",
-      time: "09:45",
-      type: "Security",
-      location: "789 Oak St, Chicago",
-      description: "Encountered unauthorized person at work site.",
-      images: ["https://via.placeholder.com/600/56a8c2"],
-      status: "resolved",
-    },
-    {
-      id: 4,
-      staffId: 4,
-      staffName: "Alice Williams",
-      date: "2023-07-18",
-      time: "16:20",
-      type: "Medical",
-      location: "101 Pine St, San Francisco",
-      description: "Minor injury while handling equipment.",
-      images: [
-        "https://via.placeholder.com/600/b0f7cc",
-        "https://via.placeholder.com/600/54176f",
-      ],
-      status: "pending",
-    },
-    {
-      id: 5,
-      staffId: 5,
-      staffName: "Charlie Brown",
-      date: "2023-08-02",
-      time: "11:30",
-      type: "Other",
-      location: "202 Maple St, Seattle",
-      description: "Vehicle breakdown during client visit.",
-      images: [],
-      status: "resolved",
-    },
-  ]);
 
   // Handle filter input changes
   const handleFilterChange = (e) => {
@@ -113,12 +44,8 @@ const EmergencyLogs = () => {
   // Handle filter submit
   const handleFilterSubmit = (e) => {
     e.preventDefault();
-
     // In a real app, fetch filtered logs from API
     console.log("Filtering logs with:", filterData);
-
-    // For demo, we're not actually filtering the data
-    // In a real app, this would update the logs state with filtered data
   };
 
   // Handle view log details
@@ -175,6 +102,42 @@ const EmergencyLogs = () => {
       ),
     },
   ];
+  // Fetch logs from API
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (response.status === 200 && response.data.success === 1) {
+          const formattedLogs = response.data.data.map((log) => ({
+            id: log.id,
+            date: new Date(log.createdAt).toLocaleDateString(),
+            time: new Date(log.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            staffName: log.staff.name,
+            description: log.description,
+            images: log.images || [],
+          }));
+          setLogs(formattedLogs);
+        } else {
+          setError("Failed to fetch logs");
+        }
+      }
+      catch (err) {
+        console.error("Error fetching logs:", err);
+        setError("An error occurred while fetching logs");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLogs();
+  }
+    , [API_URL_STAFF]);
 
   return (
     <div className="emergency-logs">
@@ -219,20 +182,9 @@ const EmergencyLogs = () => {
               <Col md={4}>
                 <Form.Group className="mb-3" controlId="staffId">
                   <Form.Label>Staff Members</Form.Label>
-                  <Form.Select
-                    name="staffId"
-                    value={filterData.staffId}
-                    onChange={handleFilterChange}
-                  >
-                    <option value="" disabled hidden>
-                      All Staff Members
-                    </option>
-                    {staffList.map((staff) => (
-                      <option key={staff.id} value={staff.id}>
-                        {staff.name}
-                      </option>
-                    ))}
-                  </Form.Select>
+                  <SearchStaff
+                    token={token}
+                  />
                 </Form.Group>
               </Col>
 

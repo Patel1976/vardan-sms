@@ -1,22 +1,73 @@
 
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faBars, 
-  faUser, 
-  faSignOutAlt, 
+import {
+  faBars,
+  faUser,
+  faSignOutAlt,
   faCog,
-  faMoon, 
+  faMoon,
   faSun,
   faLock,
   faUserCog,
   faEnvelope,
   faBell
 } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+
+
 
 const Header = ({ toggleSidebar, theme, toggleTheme }) => {
+  const API_URL = import.meta.env.VITE_BASE_URL;
+  const [userName, setUserName] = useState('');
+  const isMounted = useRef(false);
+
+  const handleLogout = async () => {
+    try {
+
+      await axios.post(`${API_URL}auth/logout`, null, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      localStorage.removeItem("token");
+      localStorage.removeItem("email");
+      sessionStorage.removeItem("Role");
+      window.location.href = '/login';
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.post(`${API_URL}user-profile`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        if (response.status === 200 && response.data.success === 1) {
+          const user = response.data.data;
+          setUserName(user.name);
+          sessionStorage.setItem('Role', response.data.role);
+          sessionStorage.setItem('LoggedInUserId', user.id);
+
+          const encodedPermissions = btoa(JSON.stringify(response.data.permissions));
+          sessionStorage.setItem('Permissions', encodedPermissions);
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+
+    if (!isMounted.current) {
+      fetchUser();
+      isMounted.current = true;
+    }
+  }, [API_URL]);
   return (
     <header className="header" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
       <div className="d-flex align-items-center">
@@ -60,7 +111,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
                   className="user-avatar"
                 />
               </div>
-              <span className="user-name d-none d-md-inline ms-2">Admin</span>
+              <span className="user-name d-none d-md-inline ms-2">{userName}</span>
             </div>
           </Dropdown.Toggle>
 
@@ -69,11 +120,10 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
             className={`py-0 ${theme === "dark" ? "dropdown-menu-dark" : ""}`}
           >
             <div
-              className={`px-3 py-2 border-bottom ${
-                theme === "dark" ? "bg-dark border-secondary" : "bg-light"
-              }`}
+              className={`px-3 py-2 border-bottom ${theme === "dark" ? "bg-dark border-secondary" : "bg-light"
+                }`}
             >
-              <div className="fw-bold">Admin</div>
+              <div className="fw-bold">{userName}</div>
             </div>
 
             <Dropdown.Item as={Link} to="/profile">
@@ -88,7 +138,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
 
             <Dropdown.Divider />
 
-            <Dropdown.Item as={Link} to="/login" className="text-danger">
+            <Dropdown.Item onClick={handleLogout} className="text-danger">
               <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />
               Logout
             </Dropdown.Item>

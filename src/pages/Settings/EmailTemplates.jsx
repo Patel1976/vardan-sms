@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,49 +11,37 @@ import {
 import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
+import axios from 'axios';
 
 const EmailTemplates = () => {
   const navigate = useNavigate();
-
-  // Sample templates
-  const [templates, setTemplates] = useState([
-    {
-      id: 1,
-      name: "Welcome Email",
-      subject: "Welcome to StaffPro!",
-      body: "<p>Dear [Name],</p><p>Welcome to StaffPro! We are excited to have you on board.</p><p>Best regards,<br>StaffPro Team</p>",
-    },
-    {
-      id: 2,
-      name: "Password Reset",
-      subject: "Password Reset Request",
-      body: "<p>Dear [Name],</p><p>You have requested a password reset. Please click the link below to reset your password:</p><p>[Reset Link]</p><p>Best regards,<br>StaffPro Team</p>",
-    },
-    {
-      id: 3,
-      name: "Staff Onboarding",
-      subject: "Your Onboarding Information",
-      body: "<p>Dear [Name],</p><p>Welcome to the team! Here is your onboarding information:</p><ul><li>Login details: [Login]</li><li>Start date: [StartDate]</li><li>Department: [Department]</li></ul><p>Best regards,<br>StaffPro Team</p>",
-    },
-    {
-      id: 4,
-      name: "Emergency Notification",
-      subject: "Emergency Alert",
-      body: "<p>Attention!</p><p>An emergency has been reported at [Location]. Please follow safety protocols.</p><p>Details: [Details]</p><p>StaffPro Emergency Team</p>",
-    },
-    {
-      id: 5,
-      name: "Weekly Report",
-      subject: "Weekly Activity Report",
-      body: "<p>Dear [Name],</p><p>Here is your weekly activity report:</p><p>[Report Content]</p><p>Best regards,<br>StaffPro Team</p>",
-    },
-  ]);
+  const API_URL_EMAIL_TEMPLATES = import.meta.env.VITE_BASE_URL;
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const token = localStorage.getItem("token");
 
   // Delete template handler
-  const handleDeleteTemplate = (templateId) => {
-    if (window.confirm("Are you sure you want to delete this template?")) {
-      setTemplates(templates.filter((template) => template.id !== templateId));
+  const handleDeleteTemplate = async (templateId) => {
+    if (!window.confirm("Are you sure you want to delete this template?")) return;
+    try {
+      const response = await axios.delete(`${API_URL_EMAIL_TEMPLATES}delete-email-template`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: { id: templateId },
+      });
+      if (response.status === 200 && response.data.success === 1) {
+        alert("Template deleted successfully");
+        setTemplates(templates.filter(template => template.id !== templateId));
+      } else {
+        alert(response.data.message || "Failed to delete template");
+      }
     }
+    catch (err) {
+      const msg = err.response?.data?.message || "Error deleting template";
+      alert(msg);
+    };
   };
 
   // Table columns configuration
@@ -82,9 +70,7 @@ const EmailTemplates = () => {
           <ActionButton
             icon={faEdit}
             variant="outline-primary"
-            onClick={() =>
-              navigate(`/email-templates/edit-email-template/${template.id}`)
-            }
+            onClick={() => navigate(`/email-template/edit/${template.id}`)}
             title="Edit Template"
           />
           <ActionButton
@@ -97,6 +83,29 @@ const EmailTemplates = () => {
       ),
     },
   ];
+  // Fetch email templates
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await axios.post(`${API_URL_EMAIL_TEMPLATES}get-all-email-templates`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.status === 200) {
+          setTemplates(response.data.data);
+        } else {
+          setError("Failed to fetch email templates");
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || "Error fetching email templates");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   return (
     <div className="email-templates">
@@ -111,7 +120,7 @@ const EmailTemplates = () => {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate("/email-templates/add-email-template")}
+            onClick={() => navigate('/email-template/add')}
           >
             <FontAwesomeIcon icon={faPlus} className="me-1" />
             Add Template

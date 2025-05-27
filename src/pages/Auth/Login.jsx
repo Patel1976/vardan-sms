@@ -1,16 +1,15 @@
-import React, { useState } from "react";
-import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSignInAlt,
-  faLock,
-  faEnvelope,
-} from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
+
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Form, Button, Row, Col } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignInAlt, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [redirectNow, setRedirectNow] = useState(false);
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,7 +25,7 @@ const Login = () => {
     });
   };
 
-  const validateForm = () => {
+  const ValidationSchema = () => {
     const newErrors = {};
 
     if (!formData.email) {
@@ -47,106 +46,126 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const isValid = ValidationSchema();
+    if (!isValid) return;
 
-    if (validateForm()) {
-      // In a real app, you would handle authentication here
-      console.log("Form submitted:", formData);
-      const res = await axios.post(
-        `${REACT_BACKEND_URL}api/admin/auth/login/`,
-        formData
-      );
-      console.log(res);
+    try {
+      const res = await axios.post(`${API_URL}api/admin/auth/login`, {
+        email: formData.email,
+        password: formData.password,
+      });
 
-      navigate("/"); // Redirect to dashboard on successful login
+      if (res.status === 200 && res.data.success === 1) {
+        const { token, userData } = res.data.data;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", userData.email);
+        sessionStorage.setItem("Role", userData.id);
+
+        setRedirectNow(true);
+      }
+    } catch (error) {
+      if (error.response?.data?.message === "Incorrect email or password") {
+        setErrors({ email: "Incorrect Email or Password!" });
+      } else {
+        console.error("Login error:", error);
+        setErrors({ general: "Login failed. Please try again later." });
+      }
     }
   };
 
-  return (
-    <div className="auth-page">
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={8} lg={6} xl={5}>
-            <div className="auth-card mx-auto">
-              <div className="auth-logo mb-4 d-flex align-items-center justify-content-center">
-                <img
-                  src="/public/logo.png"
-                  alt="Logo"
-                  className="logo-img h-50"
-                  width="40%"
-                />
-              </div>
+  useEffect(() => {
+    if (redirectNow) {
+      console.log("Redirecting to /");
+      navigate("/dashboard");
+    }
+  }, [redirectNow]);
 
-              <Card.Title className="text-center mb-4 fw-bold">
-                <h4>Sign In</h4>
-              </Card.Title>
-
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <FontAwesomeIcon icon={faEnvelope} />
-                    </span>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter Your Email"
-                      isInvalid={!!errors.email}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.email}
-                    </Form.Control.Feedback>
-                  </div>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <FontAwesomeIcon icon={faLock} />
-                    </span>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter Your Password"
-                      isInvalid={!!errors.password}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.password}
-                    </Form.Control.Feedback>
-                  </div>
-                </Form.Group>
-
-                <Row className="mb-3">
-                  <Col>
-                    <Form.Check
-                      type="checkbox"
-                      name="rememberMe"
-                      label="Remember me"
-                      checked={formData.rememberMe}
-                      onChange={handleChange}
-                    />
-                  </Col>
-                  <Col className="text-end">
-                    <Link to="/forgot-password">Forgot Password?</Link>
-                  </Col>
-                </Row>
-
-                <Button variant="primary" type="submit" className="w-100 mb-3">
-                  <FontAwesomeIcon icon={faSignInAlt} className="me-2" />
-                  Sign In
-                </Button>
-              </Form>
+return (
+  <div className="auth-page">
+    <Container>
+      <Row className="justify-content-center">
+        <Col md={8} lg={6} xl={5}>
+          <div className="auth-card mx-auto">
+            <div className="auth-logo mb-4 d-flex align-items-center justify-content-center">
+              <img src="/public/logo.png" alt="Logo" className="logo-img h-50" width="40%" />
             </div>
-          </Col>
-        </Row>
-      </Container>
-    </div>
-  );
+
+            <Card.Title className="text-center mb-4 fw-bold">
+              <h4>Sign In</h4>
+            </Card.Title>
+
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <FontAwesomeIcon icon={faEnvelope} />
+                  </span>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    isInvalid={!!errors.email}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.email}
+                  </Form.Control.Feedback>
+                </div>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <FontAwesomeIcon icon={faLock} />
+                  </span>
+                  <Form.Control
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    isInvalid={!!errors.password}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </div>
+              </Form.Group>
+
+              <Row className="mb-3">
+                <Col>
+                  <Form.Check
+                    type="checkbox"
+                    name="rememberMe"
+                    label="Remember me"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                  />
+                </Col>
+                <Col className="text-end">
+                  <Link to="/forgot-password">Forgot Password?</Link>
+                </Col>
+              </Row>
+
+              <Button
+                variant="primary"
+                type="submit"
+                className="w-100 mb-3"
+              >
+                <FontAwesomeIcon icon={faSignInAlt} className="me-1" />
+                Sign In
+              </Button>
+            </Form>
+          </div>
+        </Col>
+      </Row>
+    </Container>
+  </div>
+);
 };
 
 export default Login;

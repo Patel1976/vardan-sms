@@ -17,10 +17,12 @@ import {
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
+import axios from "axios";
 
 const AddStaff = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
   const isEditMode = !!id;
 
   // Form state
@@ -28,78 +30,74 @@ const AddStaff = () => {
     name: "",
     email: "",
     phone: "",
+    mpin: "",
     address: "",
-    city: "",
-    state: "",
-    zipCode: "",
+    status: true,
     department: "",
-    position: "",
-    hireDate: "",
-    status: "active",
-    profileImage: null,
-    profileImageUrl: "",
+    profileImageBase64: "",
+    profileImageFile: null,
   });
 
   const [validated, setValidated] = useState(false);
 
-  // Sample departments for dropdown
-  const departments = [
-    { id: 1, name: "Marketing" },
-    { id: 2, name: "HR" },
-    { id: 3, name: "Sales" },
-    { id: 4, name: "Development" },
-    { id: 5, name: "Finance" },
-  ];
-
-  // Sample positions for dropdown
-  const positions = [
-    { id: 1, name: "Manager" },
-    { id: 2, name: "Team Lead" },
-    { id: 3, name: "Senior Staff" },
-    { id: 4, name: "Junior Staff" },
-    { id: 5, name: "Intern" },
-  ];
-
-  // If in edit mode, load staff data
   useEffect(() => {
     if (isEditMode) {
-      // In a real app, fetch staff data from API using ID
-      // For demo, we're using mock data
-      const staffData = {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "(123) 456-7890",
-        address: "123 Main St",
-        city: "New York",
-        state: "NY",
-        zipCode: "10001",
-        department: "Marketing",
-        position: "Manager",
-        hireDate: "2023-01-15",
-        status: "active",
-        profileImageUrl: "",
+      // Fetch staff data for editing
+      const fetchStaffData = async () => {
+        try {
+          const response = await axios.get(
+            `${API_URL_STAFF}get-staff-user/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          const staffData = response.data.data;
+          setFormData({
+            name: staffData.name || "",
+            email: staffData.email || "",
+            phone: staffData.phone || "",
+            mpin: staffData.mpin || "",
+            address: staffData.address || "",
+            status: staffData.status ?? true,
+            department: staffData.department || "",
+            profileImageBase64: staffData.image || "",
+            profileImageFile: null,
+          });
+        } catch (error) {
+          console.error("Error fetching staff data:", error);
+          alert("Failed to load user data.");
+        }
       };
-
-      setFormData(staffData);
+      fetchStaffData();
     }
   }, [id, isEditMode]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   // Handle profile image change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImageFile: file,
+      }));
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFormData({ ...formData, profileImageUrl: event.target.result });
+        setFormData((prev) => ({
+          ...prev,
+          profileImageBase64: event.target.result.split(",")[1],
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -108,21 +106,48 @@ const AddStaff = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const form = e.currentTarget;
-
-    // Check form validity
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
       return;
     }
 
-    // In a real app, send data to API
-    console.log("Form submitted with data:", formData);
-
-    // Redirect back to staff list
-    navigate("/staff");
+    const payload = {
+      name: formData.name,
+      email: formData.email || null,
+      phone: formData.phone,
+      mpin: formData.mpin || null,
+      address: formData.address,
+      status: formData.status,
+      department: formData.department || null,
+      ...(formData.profileImageBase64 && { image: formData.profileImageBase64 }),
+    };
+    const submitForm = async () => {
+      try {
+        if (isEditMode) {
+          axios.put(`${API_URL_STAFF}update-staff-user/${id}`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          alert("Staff updated successfully");
+        }
+        else {
+          axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          alert("Staff added successfully");
+        }
+        navigate("/staff");
+      } catch (err) {
+        const msg = err.response?.data?.message || "Error saving staff";
+        alert(msg);
+      }
+    };
+    submitForm();
   };
 
   return (
@@ -166,9 +191,9 @@ const AddStaff = () => {
                   }}
                   className="upload-profile"
                 >
-                  {formData.profileImageUrl ? (
+                  {formData.profileImageBase64 ? (
                     <Image
-                      src={formData.profileImageUrl}
+                      src={`data:image/jpeg;base64,${formData.profileImageBase64}`}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -246,39 +271,40 @@ const AddStaff = () => {
                       />
                     </Form.Group>
                   </Col>
-
-                  <Col md={6}>
-                    <Form.Group className="mb-3" controlId="staffDepartment">
-                      <Form.Label>Department</Form.Label>
-                      <Form.Select
-                        name="department"
-                        value={formData.department}
-                        onChange={handleInputChange}
-                      >
-                        <option value="" disabled hidden>
-                          Select Department
-                        </option>
-                        {departments.map((dept) => (
-                          <option key={dept.id} value={dept.name}>
-                            {dept.name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={12}>
-                    <Form.Group className="mb-3" controlId="staffAddress">
-                      <Form.Label>Address</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter Address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
-                    </Form.Group>
-                  </Col>
                 </Row>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col md={12}>
+                <Form.Group className="mb-3" controlId="staffAddress">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter street address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <h5 className="mt-3 mb-3">Employment Information</h5>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="staffDepartment">
+                  <Form.Label>Department</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter department"
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                  >
+                  </Form.Control>
+                </Form.Group>
               </Col>
             </Row>
 
@@ -296,7 +322,7 @@ const AddStaff = () => {
           </Form>
         </Card.Body>
       </Card>
-    </div>
+    </div >
   );
 };
 

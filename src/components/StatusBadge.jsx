@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 
 const StatusBadge = ({ status, customStatusMap }) => {
-  // Default status mapping
   const defaultStatusMap = {
     active: { bg: 'success', text: 'Active' },
     inactive: { bg: 'secondary', text: 'Inactive' },
@@ -15,20 +13,18 @@ const StatusBadge = ({ status, customStatusMap }) => {
     inProgress: { bg: 'primary', text: 'In Progress' },
   };
 
-  // Merge custom status map with default
-  const statusMap = {...defaultStatusMap, ...customStatusMap};
-  
-  // Get status config or use generic fallback
-  const statusConfig = statusMap[status] || { 
-    bg: 'info', 
-    text: status.charAt(0).toUpperCase() + status.slice(1) 
+  const statusKey = typeof status === 'boolean'
+    ? status ? 'active' : 'inactive'
+    : String(status).toLowerCase();
+
+  const statusMap = { ...defaultStatusMap, ...customStatusMap };
+  const statusConfig = statusMap[statusKey] || {
+    bg: 'info',
+    text: statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
   };
-  
+
   return (
-    <Badge 
-      bg={statusConfig.bg}
-      className="status-badge"
-    >
+    <Badge bg={statusConfig.bg} className="status-badge">
       {statusConfig.text}
     </Badge>
   );
