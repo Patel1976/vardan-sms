@@ -35,10 +35,10 @@ const Sidebar = ({ isOpen, setIsOpen, setSidebarOpen, setHovering, theme }) => {
       userManagement:
         currentPath.includes("/users") || currentPath.includes("/roles"),
       staffManagement:
-        currentPath.includes("/staff") || currentPath.includes("/work-journey"),
+        currentPath.includes("/staff") || currentPath.includes("/workjourney"),
       reports:
         currentPath.includes("/emergency-logs") ||
-        currentPath.includes("/time-logs"),
+        currentPath.includes("/timelogs"),
       settings: currentPath.includes("/email-templates"),
     }));
   }, [location.pathname]);
