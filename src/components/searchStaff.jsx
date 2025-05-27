@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { useState, useCallback, useEffect } from 'react';
 
 const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
+    const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
     const [selectedOption, setSelectedOption] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
 
@@ -17,7 +18,7 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
 
     const fetchSuggestions = useCallback(async (query) => {
         try {
-            const response = await axios.get(`http://localhost:8000/api/staff-users/search-staff?query=${query}`, {
+            const response = await axios.get(`${API_URL_STAFF}search-staff?query=${query}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -43,7 +44,7 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
     };
 
     return (
-        <div className="d-flex">
+        <div className="form-group">
             <Select
                 isClearable
                 menuPlacement="auto"

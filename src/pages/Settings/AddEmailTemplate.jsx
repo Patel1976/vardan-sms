@@ -11,10 +11,12 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import PageTitle from "../../components/PageTitle";
+import axios from 'axios';
 
 const AddEmailTemplate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const API_URL_EMAIL_TEMPLATES = import.meta.env.VITE_BASE_URL;
   const isEditMode = !!id;
 
   // Form state
@@ -26,7 +28,6 @@ const AddEmailTemplate = () => {
 
   const [validated, setValidated] = useState(false);
 
-  // Sample placeholders for email templates
   const placeholders = [
     { key: "[Name]", description: "Full name of the recipient" },
     { key: "[Email]", description: "Email address of the recipient" },
@@ -53,7 +54,6 @@ const AddEmailTemplate = () => {
     ],
   };
 
-  // Quill editor formats
   const quillFormats = [
     "header",
     "bold",
@@ -69,31 +69,36 @@ const AddEmailTemplate = () => {
     "image",
   ];
 
-  // If in edit mode, load template data
   useEffect(() => {
     if (isEditMode) {
-      // In a real app, fetch template data from API using ID
-      // For demo, we're using mock data
-      const templateData = {
-        name: "Welcome Email",
-        subject: "Welcome to StaffPro!",
-        body: "<p>Dear [Name],</p><p>Welcome to StaffPro! We are excited to have you on board.</p><p>Best regards,<br>StaffPro Team</p>",
+      // Fetch template data for editing
+      const fetchTemplateData = async () => {
+        try {
+          const response = await axios.post(`${API_URL_EMAIL_TEMPLATES}get-email-template/${id}`, {}, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          const templateData = response.data.data;
+          setFormData({
+            name: templateData.name || "",
+            subject: templateData.subject || "",
+            body: templateData.body || "",
+          });
+        } catch (error) {
+          const errorMessage = error.response?.data?.message || "An error occurred while fetching template data.";
+          alert(errorMessage);
+        }
       };
-
-      setFormData(templateData);
+      fetchTemplateData();
     }
   }, [id, isEditMode]);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle quill editor content change
   const handleEditorChange = (content) => {
     setFormData({
       ...formData,
@@ -101,7 +106,6 @@ const AddEmailTemplate = () => {
     });
   };
 
-  // Insert placeholder into subject or body at cursor position
   const insertPlaceholder = (placeholder, field) => {
     if (field === "subject") {
       setFormData({
@@ -109,7 +113,6 @@ const AddEmailTemplate = () => {
         subject: formData.subject + placeholder,
       });
     } else if (field === "body") {
-      // For body, we simply append it since we don't have direct cursor control with ReactQuill
       setFormData({
         ...formData,
         body: formData.body + placeholder,
@@ -120,21 +123,40 @@ const AddEmailTemplate = () => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const form = e.currentTarget;
-
-    // Check form validity
     if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
       return;
     }
-
-    // In a real app, send data to API
-    console.log("Form submitted with data:", formData);
-
-    // Redirect back to templates list
-    navigate("/email-template");
+    const payload = {
+      id: id,
+      name: formData.name,
+      subject: formData.subject,
+      body: formData.body,
+    };
+    const submitForm = async () => {
+      try {
+        if (isEditMode) {
+          await axios.put(`${API_URL_EMAIL_TEMPLATES}update-email-template`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+        } else {
+          await axios.post(`${API_URL_EMAIL_TEMPLATES}create-email-template`, payload, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+        }
+        navigate("/email-template");
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || "An error occurred while submitting the form.";
+        alert(errorMessage);
+      }
+    }
+    submitForm();
   };
 
   return (

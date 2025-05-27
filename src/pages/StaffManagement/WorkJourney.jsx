@@ -13,130 +13,132 @@ import {
   Polyline,
 } from "@react-google-maps/api";
 import PageTitle from "../../components/PageTitle";
-import searchStaff from "../../components/searchStaff";
+import SearchStaff from "../../components/searchStaff";
 import axios from "axios";
+
+const libraries = ["places"];
 
 const WorkJourney = () => {
   const [staffList, setStaffList] = useState([]);
-  const [staffSearch, setStaffSearch] = useState("");
   const [selectedStaff, setSelectedStaff] = useState("");
   const [dateRange, setDateRange] = useState({ fromDate: "", toDate: "" });
   const [showMap, setShowMap] = useState(false);
+  const [journeyPath, setJourneyPath] = useState([]);
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+  const [loading, setLoading] = useState(false);
+
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const MAPS_API_KEY = import.meta.env.VITE_MAPS_API_KEY;
+  const token = localStorage.getItem("token");
 
-  // Fetch staff on staffSearch change (with debounce)
-  useEffect(() => {
-    const fetchStaff = async () => {
-      if (staffSearch.trim() === "") {
-        setStaffList([]);
-        return;
-      }
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: MAPS_API_KEY,
+    libraries,
+  });
 
-      try {
-        const response = await axios.get(`${API_URL_STAFF}search-staff`, {
-          params: { query: staffSearch },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (response.data.success) {
-          setStaffList(response.data.staff);
-        } else {
-          setStaffList([]);
-        }
-      } catch (error) {
-        console.error("Error fetching staff:", error);
-        setStaffList([]);
-      }
-    };
-
-    const debounceFetch = setTimeout(fetchStaff, 300);
-    return () => clearTimeout(debounceFetch);
-  }, [staffSearch]);
-
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setDateRange({
+      ...dateRange,
+      [name]: value,
+    });
+  };
 
-    if (name === "staffSearch") {
-      setStaffSearch(value);
-    } else if (name === "staff") {
-      setSelectedStaff(value);
-      setShowMap(false);
-    } else {
-      setDateRange({
-        ...dateRange,
-        [name]: value,
+  const handleBack = () => {
+    setShowMap(false);
+    setJourneyPath([]);
+  };
+
+  const handleStaffSelect = (staff) => {
+    setSelectedStaff(staff);
+  };
+
+  const fetchJourneyData = async () => {
+    if (!selectedStaff || !selectedStaff.uuid) return;
+
+    try {
+      setLoading(true);
+      const requestData = {
+        uuid: selectedStaff.uuid,
+        ...(dateRange.fromDate && { start_date: dateRange.fromDate }),
+        ...(dateRange.toDate && { end_date: dateRange.toDate }),
+        token: token,
+      };
+      const response = await axios.post(
+        `${API_URL_STAFF}get-staff-locations/${selectedStaff.uuid}`, requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data.locations || [];
+
+      const transformed = data.map((item) => {
+        const timestamp = Number(item.created_at?.$date?.$numberLong);
+        const time = timestamp
+          ? new Date(timestamp).toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          : "Invalid Date";
+        return {
+          lat: Number(item.latitude),
+          lng: Number(item.longitude),
+          time,
+        };
       });
+
+      setJourneyPath(transformed);
+
+      if (transformed.length > 0) {
+        setMapCenter({ lat: transformed[0].lat, lng: transformed[0].lng });
+      }
+
+    } catch (error) {
+      console.error("Error fetching journey data:", error);
+      alert("Failed to fetch journey data.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // No validation required - all fields optional
-
-    // In a real app, fetch journey data from API
-    console.log("Fetching journey for:", {
-      staffId: selectedStaff || "all",
-      fromDate: dateRange.fromDate || "all dates",
-      toDate: dateRange.toDate || "all dates",
-    });
-
-    // Show map
+    await fetchJourneyData();
     setShowMap(true);
   };
 
-  // Load Google Maps JavaScript API
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
-    libraries: ["places"],
-  });
-
-  // Back to selection
-  const handleBack = () => {
-    setShowMap(false);
-  };
-
-  // Filter journey data
-  const handleFilterJourney = () => {
-    console.log("Filtering journey data with:", dateRange);
-    // In a real app, this would filter the journey data based on date range
+  const handleFilterJourney = async () => {
+    await fetchJourneyData();
   };
 
   return (
     <div className="work-journey">
-      <PageTitle
-        title="Work Journey"
-        breadcrumbs={[{ text: "Work Journey" }]}
-      />
+      <PageTitle title="Work Journey" breadcrumbs={[{ text: "Work Journey" }]} />
 
       {!showMap ? (
         <Card>
           <Card.Header className="text-xl fw-semibold">Work Logs</Card.Header>
-
           <Card.Body>
             <Form onSubmit={handleSubmit}>
               <Row>
                 <Col md={4}>
-                  <Form.Group className="mb-3" controlId="selectStaff">
+                  <Form.Group className="mb-3">
                     <Form.Label>Select a Staff</Form.Label>
-                    <SearchBar
+                    <SearchStaff
+                      onSelectedOptionsChange={handleStaffSelect}
+                      staffName={selectedStaff}
                       token={token}
-                      staffName={
-                        selectedStaff
-                          ? { value: selectedStaff.id, label: selectedStaff.name }
-                          : null
-                      }
-                      onSelectedOptionsChange={(selected) => setSelectedStaff(selected)}
                     />
                   </Form.Group>
                 </Col>
-
                 <Col md={4}>
-                  <Form.Group className="mb-3" controlId="fromDate">
+                  <Form.Group className="mb-3">
                     <Form.Label>From Date</Form.Label>
                     <Form.Control
                       type="date"
@@ -146,9 +148,8 @@ const WorkJourney = () => {
                     />
                   </Form.Group>
                 </Col>
-
                 <Col md={4}>
-                  <Form.Group className="mb-3" controlId="toDate">
+                  <Form.Group className="mb-3">
                     <Form.Label>To Date</Form.Label>
                     <Form.Control
                       type="date"
@@ -159,7 +160,6 @@ const WorkJourney = () => {
                   </Form.Group>
                 </Col>
               </Row>
-
               <div className="text-center mt-3">
                 <Button variant="primary" type="submit" className="px-4">
                   <FontAwesomeIcon icon={faSearch} className="me-2" />
@@ -174,28 +174,17 @@ const WorkJourney = () => {
           <Card className="mb-4">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <div>
-                <span>Journey Map for </span>
-                <strong>
-                  {selectedStaff
-                    ? staffList.find(
-                      (s) => s.id.toString() === selectedStaff.toString()
-                    )?.name
-                    : "All Staff"}
-                </strong>
+                Journey Map for <strong>{selectedStaff?.label}</strong>
               </div>
-
-              <div className="d-flex gap-2">
-                <Button variant="secondary" size="sm" onClick={handleBack}>
-                  <FontAwesomeIcon icon={faArrowLeft} className="me-1" />
-                  Back
-                </Button>
-              </div>
+              <Button variant="secondary" size="sm" onClick={handleBack}>
+                <FontAwesomeIcon icon={faArrowLeft} className="me-1" />
+                Back
+              </Button>
             </Card.Header>
-
             <Card.Body>
               <Row className="mb-3">
                 <Col md={4}>
-                  <Form.Group className="mb-3" controlId="journeyFromDate">
+                  <Form.Group>
                     <Form.Label>From Date</Form.Label>
                     <Form.Control
                       type="date"
@@ -205,9 +194,8 @@ const WorkJourney = () => {
                     />
                   </Form.Group>
                 </Col>
-
                 <Col md={4}>
-                  <Form.Group className="mb-3" controlId="journeyToDate">
+                  <Form.Group>
                     <Form.Label>To Date</Form.Label>
                     <Form.Control
                       type="date"
@@ -217,12 +205,12 @@ const WorkJourney = () => {
                     />
                   </Form.Group>
                 </Col>
-
                 <Col md={4} className="d-flex align-items-end">
                   <Button
                     variant="primary"
                     onClick={handleFilterJourney}
                     className="mb-3"
+                    disabled={loading}
                   >
                     <FontAwesomeIcon icon={faSearch} className="me-1" />
                     Filter
@@ -231,32 +219,33 @@ const WorkJourney = () => {
               </Row>
 
               {isLoaded ? (
-                <div className="map-container">
-                  <GoogleMap
-                    mapContainerStyle={{ width: "100%", height: "500px" }}
-                    center={mapCenter}
-                    zoom={12}
-                  >
-                    {/* Journey markers */}
-                    {journeyPath.map((point, index) => (
-                      <Marker
-                        key={index}
-                        position={{ lat: point.lat, lng: point.lng }}
-                        label={(index + 1).toString()}
+                journeyPath.length > 0 ? (
+                  <div className="map-container">
+                    <GoogleMap
+                      mapContainerStyle={{ width: "100%", height: "500px" }}
+                      center={mapCenter}
+                      zoom={14}
+                    >
+                      {journeyPath.map((point, index) => (
+                        <Marker
+                          key={index}
+                          position={{ lat: point.lat, lng: point.lng }}
+                          label={(index + 1).toString()}
+                        />
+                      ))}
+                      <Polyline
+                        path={journeyPath}
+                        options={{
+                          strokeColor: "#F6861F",
+                          strokeOpacity: 0.8,
+                          strokeWeight: 3,
+                        }}
                       />
-                    ))}
-
-                    {/* Journey path line */}
-                    <Polyline
-                      path={journeyPath}
-                      options={{
-                        strokeColor: "#F6861F",
-                        strokeOpacity: 0.8,
-                        strokeWeight: 3,
-                      }}
-                    />
-                  </GoogleMap>
-                </div>
+                    </GoogleMap>
+                  </div>
+                ) : (
+                  <Alert variant="warning">No journey data found for the selected filters.</Alert>
+                )
               ) : (
                 <Alert variant="info">Loading map...</Alert>
               )}
@@ -284,12 +273,10 @@ const WorkJourney = () => {
                     >
                       <FontAwesomeIcon icon={faMapMarkedAlt} />
                     </div>
-
                     <div className="timeline-content">
                       <h6 className="mb-0">Location {index + 1}</h6>
                       <p className="small text-muted mb-0">
-                        {point.time} - Lat: {point.lat.toFixed(6)}, Lng:{" "}
-                        {point.lng.toFixed(6)}
+                        {point.time} - Lat: {point.lat}, Lng: {point.lng}
                       </p>
                     </div>
                   </div>
