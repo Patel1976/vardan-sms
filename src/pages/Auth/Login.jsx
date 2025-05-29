@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSignInAlt,
-  faLock,
-  faEnvelope,
-} from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
+
+import React, { useState, useEffect } from 'react';
+import { Container, Card, Form, Button, Row, Col } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignInAlt, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { setCookie } from 'nookies';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [redirectNow, setRedirectNow] = useState(false);
   const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -61,11 +61,14 @@ const Login = () => {
       if (res.status === 200 && res.data.success === 1) {
         const { token, userData } = res.data.data;
 
-        localStorage.setItem("token", token);
+        setCookie(null, "token", token, {
+          maxAge: 60 * 60,
+          path: "/",
+        });
         localStorage.setItem("email", userData.email);
         sessionStorage.setItem("Role", userData.id);
-
         setRedirectNow(true);
+        login();
       }
     } catch (error) {
       const responseErrors = error.response?.data?.data?.errors;
@@ -119,67 +122,71 @@ const Login = () => {
                 <h4>Sign In</h4>
               </Card.Title>
 
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <FontAwesomeIcon icon={faEnvelope} />
-                    </span>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      isInvalid={!!errors.email}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.email}
-                    </Form.Control.Feedback>
-                  </div>
-                </Form.Group>
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Email</Form.Label>
+                    <div className="input-group">
+                      <span className="input-group-text">
+                        <FontAwesomeIcon icon={faEnvelope} />
+                      </span>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter your email"
+                        isInvalid={!!errors.email}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.email}
+                      </Form.Control.Feedback>
+                    </div>
+                  </Form.Group>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <FontAwesomeIcon icon={faLock} />
-                    </span>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      isInvalid={!!errors.password}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.password}
-                    </Form.Control.Feedback>
-                  </div>
-                </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Password</Form.Label>
+                    <div className="input-group">
+                      <span className="input-group-text">
+                        <FontAwesomeIcon icon={faLock} />
+                      </span>
+                      <Form.Control
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Enter your password"
+                        isInvalid={!!errors.password}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                      </Form.Control.Feedback>
+                    </div>
+                  </Form.Group>
 
-                <Row className="mb-3">
-                  <Col>
-                    <Form.Check
-                      type="checkbox"
-                      name="rememberMe"
-                      label="Remember me"
-                      checked={formData.rememberMe}
-                      onChange={handleChange}
-                    />
-                  </Col>
-                  <Col className="text-end">
-                    <Link to="/forgot-password">Forgot Password?</Link>
-                  </Col>
-                </Row>
+                  <Row className="mb-3">
+                    <Col>
+                      <Form.Check
+                        type="checkbox"
+                        name="rememberMe"
+                        label="Remember me"
+                        checked={formData.rememberMe}
+                        onChange={handleChange}
+                      />
+                    </Col>
+                    <Col className="text-end">
+                      <Link to="/forget-password">Forgot Password?</Link>
+                    </Col>
+                  </Row>
 
-                <Button variant="primary" type="submit" className="w-100 mb-3">
-                  <FontAwesomeIcon icon={faSignInAlt} className="me-1" />
-                  Sign In
-                </Button>
-              </Form>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="w-100 mb-3"
+                  >
+                    <FontAwesomeIcon icon={faSignInAlt} className="me-1" />
+                    Sign In
+                  </Button>
+                </Form>
             </div>
           </Col>
         </Row>

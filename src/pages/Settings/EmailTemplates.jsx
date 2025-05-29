@@ -12,6 +12,7 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import axios from 'axios';
+import { parseCookies } from "nookies";
 
 const EmailTemplates = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const EmailTemplates = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const token = localStorage.getItem("token");
+  const { token } = parseCookies();
 
   // Delete template handler
   const handleDeleteTemplate = async (templateId) => {

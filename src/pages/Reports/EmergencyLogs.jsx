@@ -12,25 +12,73 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import SearchStaff from "../../components/searchStaff";
-import axios from "axios";
+import axios from 'axios';
+import { parseCookies } from 'nookies';
 
 const EmergencyLogs = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
-  const token = localStorage.getItem("token");
+  const { token } = parseCookies();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
+  const [error, setError] = useState('');
+  const [selectedStaff, setSelectedStaff] = useState(null);
   const [filterData, setFilterData] = useState({
     fromDate: "",
     toDate: "",
-    staffId: "",
   });
-
-  const [staffList, setStaffList] = useState([]);
   const [showLogModal, setShowLogModal] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+
+  const handleStaffSelect = (staff) => {
+    setSelectedStaff(staff);
+  };
+
+  const fetchLogs = async () => {
+    try {
+      setLoading(true);
+      const requestData = {
+        fromDate: filterData.fromDate,
+        toDate: filterData.toDate,
+        token: token,
+      };
+      const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setLogs(response.data.logs || []);
+    }
+    catch (err) {
+      console.error("Failed to fetch all logs", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+  const fetchStaffLogs = async (staffId) => {
+    try {
+      const requestData = {
+        fromDate: filterData.fromDate,
+        toDate: filterData.toDate,
+        token: token,
+      };
+      const response = await axios.post(`${API_URL_STAFF}get-emergency-log/${staffId}`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setLogs(response.data.logs || []);
+    }
+    catch (err) {
+      console.error("Failed to fetch staff logs", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
 
   // Handle filter input changes
   const handleFilterChange = (e) => {
@@ -44,8 +92,11 @@ const EmergencyLogs = () => {
   // Handle filter submit
   const handleFilterSubmit = (e) => {
     e.preventDefault();
-    // In a real app, fetch filtered logs from API
-    console.log("Filtering logs with:", filterData);
+    if (selectedStaff?.value) {
+      fetchStaffLogs(selectedStaff.value);
+    } else {
+      fetchLogs();
+    }
   };
 
   // Handle view log details
@@ -106,15 +157,11 @@ const EmergencyLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.post(
-          `${API_URL_STAFF}get-all-emergency-log`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
         if (response.status === 200 && response.data.success === 1) {
           const formattedLogs = response.data.data.map((log) => ({
             id: log.id,
@@ -131,15 +178,17 @@ const EmergencyLogs = () => {
         } else {
           setError("Failed to fetch logs");
         }
-      } catch (err) {
+      }
+      catch (err) {
         console.error("Error fetching logs:", err);
         setError("An error occurred while fetching logs");
       } finally {
         setLoading(false);
       }
-    };
+    }
     fetchLogs();
-  }, [API_URL_STAFF]);
+  }
+    , [API_URL_STAFF]);
 
   return (
     <div className="emergency-logs">
@@ -184,7 +233,10 @@ const EmergencyLogs = () => {
               <Col md={4}>
                 <Form.Group className="mb-3" controlId="staffId">
                   <Form.Label>Staff Members</Form.Label>
-                  <SearchStaff token={token} />
+                  <SearchStaff
+                    onSelectedOptionsChange={handleStaffSelect}
+                    token={token}
+                  />
                 </Form.Group>
               </Col>
 

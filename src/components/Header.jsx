@@ -15,6 +15,7 @@ import {
   faEnvelope,
   faBell
 } from '@fortawesome/free-solid-svg-icons';
+import { parseCookies, destroyCookie } from 'nookies';
 import axios from 'axios';
 
 
@@ -23,18 +24,19 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const API_URL = import.meta.env.VITE_BASE_URL;
   const [userName, setUserName] = useState('');
   const isMounted = useRef(false);
+  const { token } = parseCookies();
 
   const handleLogout = async () => {
     try {
 
       await axios.post(`${API_URL}auth/logout`, null, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`,
         }
       });
-      localStorage.removeItem("token");
       localStorage.removeItem("email");
       sessionStorage.removeItem("Role");
+      destroyCookie(null, 'token');
       window.location.href = '/login';
     } catch (error) {
       console.error("Logout failed:", error);
@@ -45,7 +47,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
       try {
         const response = await axios.post(`${API_URL}user-profile`, {}, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 

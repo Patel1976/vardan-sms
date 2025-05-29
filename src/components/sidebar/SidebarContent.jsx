@@ -15,6 +15,7 @@ import {
   faCube,
   faEnvelopeOpenText,
 } from "@fortawesome/free-solid-svg-icons";
+import { parseCookies } from 'nookies';
 
 const iconMap = {
   "tachometer-alt": faTachometerAlt,
@@ -33,18 +34,15 @@ const SidebarContent = ({
 }) => {
   const [menuData, setMenuData] = useState([]);
   const API_URL = import.meta.env.VITE_BASE_URL;
+  const { token } = parseCookies();
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const response = await axios.post(
-          `${API_URL}get-all-user-module`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const response = await axios.post(`${API_URL}get-all-user-module`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (response.data.success) {
           setMenuData(response.data.data);
         }

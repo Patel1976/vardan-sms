@@ -15,6 +15,7 @@ import {
 import PageTitle from "../../components/PageTitle";
 import SearchStaff from "../../components/searchStaff";
 import axios from "axios";
+import { parseCookies } from "nookies";
 
 const libraries = ["places"];
 
@@ -29,7 +30,7 @@ const WorkJourney = () => {
 
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
   const MAPS_API_KEY = import.meta.env.VITE_MAPS_API_KEY;
-  const token = localStorage.getItem("token");
+  const { token } = parseCookies();
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: MAPS_API_KEY,

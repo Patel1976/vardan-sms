@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, FC } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Navigate  } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
+import { parseCookies } from 'nookies';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -21,6 +22,8 @@ import AddEmailTemplate from './pages/Settings/AddEmailTemplate';
 import MyProfile from './pages/Profile/MyProfile';
 import Login from './pages/Auth/Login';
 import LockScreen from './pages/Auth/LockScreen';
+import ForgetPassword from './pages/Auth/ForgetPassword';
+import ResetPassword from './pages/Auth/ResetPassword';
 import NotFound from './pages/NotFound';
 
 const AppContent = () => {
@@ -30,7 +33,9 @@ const AppContent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [theme, setTheme] = useState('light');
 
-  const isAuthPage = ['/login', '/lock-screen'].includes(location.pathname);
+  const isAuthPage = ['/login', '/lock-screen', '/forget-password', '/reset-password'].some(path =>
+    location.pathname.startsWith(path)
+  );
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -46,11 +51,13 @@ const AppContent = () => {
   }, [theme]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const { token } = parseCookies();
     const emailSaved = localStorage.getItem('email');
-    const publicRoutes = ['/login', '/lock-screen'];
+    const publicRoutes = ['/login', '/lock-screen', '/forget-password', '/reset-password'];
 
-    if (!token && !publicRoutes.includes(location.pathname)) {
+    const isPublicRoute = publicRoutes.some(route => location.pathname.startsWith(route));
+
+    if (!token && !isPublicRoute) {
       if (emailSaved) {
         navigate('/lock-screen', { replace: true });
       } else {
@@ -66,6 +73,9 @@ const AppContent = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/lock-screen" element={<LockScreen />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </div>
     );
@@ -94,6 +104,8 @@ const AppContent = () => {
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/lock-screen" element={<LockScreen />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />

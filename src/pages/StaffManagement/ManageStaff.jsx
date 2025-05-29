@@ -13,6 +13,7 @@ import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import StatusBadge from "../../components/StatusBadge";
 import axios from 'axios';
+import { parseCookies } from "nookies";
 
 const ManageStaff = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const ManageStaff = () => {
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { token } = parseCookies();
 
   // Delete staff handler
   const handleDeleteStaff = async (staffId) => {
@@ -27,7 +29,7 @@ const ManageStaff = () => {
     try{
       const res = await axios.delete(`${API_URL_STAFF}delete-staff-user/${staffId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         }
     });
       if (res.status === 200 && res.data.success === 1) {
@@ -80,7 +82,7 @@ const ManageStaff = () => {
           <ActionButton
             icon={faClock}
             variant="outline-info"
-            onClick={() => navigate(`/time-logs?staffId=${staff.id}`)}
+            onClick={() => navigate(`/timelogs?staffId=${staff.id}`)}
             title="View Time Logs"
           />
           <ActionButton
@@ -98,7 +100,7 @@ const ManageStaff = () => {
       try {
         const res = await axios.get(`${API_URL_STAFF}get-all-staff-users`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         if (res.status === 200 && res.data.success === 1) {

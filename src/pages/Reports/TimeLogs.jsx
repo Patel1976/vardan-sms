@@ -11,11 +11,12 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import SearchStaff from "../../components/searchStaff";
 import axios from "axios";
+import { parseCookies } from "nookies";
 
 const TimeLogs = () => {
   const navigate = useNavigate();
   const TIME_LOG_API = import.meta.env.VITE_BASE_URL_STAFF;
-  const token = localStorage.getItem("token");
+  const { token } = parseCookies();
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
   const [selectedStaff, setSelectedStaff] = useState(null);
@@ -23,6 +24,9 @@ const TimeLogs = () => {
     fromDate: "",
     toDate: "",
   });
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const staffIdFromUrl = queryParams.get("staffId");
 
   const handleStaffSelect = (staff) => {
     setSelectedStaff(staff);
@@ -75,8 +79,12 @@ const TimeLogs = () => {
   };
 
   useEffect(() => {
-    fetchAllLogs();
-  }, []);
+    if (staffIdFromUrl) {
+      fetchStaffLogs(staffIdFromUrl);
+    } else {
+      fetchAllLogs();
+    }
+  }, [staffIdFromUrl]);
 
   const handleFilterChange = (e) => {
     setFilterData({ ...filterData, [e.target.name]: e.target.value });
