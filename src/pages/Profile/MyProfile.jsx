@@ -18,7 +18,7 @@ import { User } from "lucide-react";
 const MyProfile = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
-  const token = localStorage.getItem("token");
+  const { token } = parseCookies();
   const [formData, setFormData] = useState({});
   useEffect(() => {
     const fetchUserData = async () => {
