@@ -1,26 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLock, faUnlock } from "@fortawesome/free-solid-svg-icons";
+import { setCookie } from "nookies";
+import axios from "axios";
 
 const LockScreen = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
-    const savedPassword = sessionStorage.getItem("password");
-    if (password === savedPassword) {
-      console.log("Unlocked successfully");
-      navigate("/dashboard");
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("email");
+    if (!savedEmail) {
+      console.log('Email Not found')
     } else {
-      setError("Incorrect password");
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    setError(newErrors.password || "");
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const isValid = validateForm();
+    if (!isValid) return;
+
+    try {
+      const res = await axios.post(`${API_URL}api/admin/auth/login`, {
+        email: email,
+        password: password,
+      });
+
+      if (res.status === 200 && res.data.success === 1) {
+        const { token } = res.data.data;
+        setCookie(null, "token", token, {
+          maxAge: 30 * 60,
+          path: "/",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || "Login failed");
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
 
@@ -40,7 +77,7 @@ const LockScreen = () => {
                   className="rounded-circle"
                   style={{ width: "100px", height: "auto", objectFit: "cover" }}
                 />
-                <p className="text-muted">admin@example.com</p>
+                <p className="text-muted"> {email} </p>
               </div>
 
               <Form onSubmit={handleSubmit}>

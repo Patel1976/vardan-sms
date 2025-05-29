@@ -18,12 +18,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
 import axios from "axios";
+import { parseCookies } from "nookies";
 
 const AddStaff = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
   const isEditMode = !!id;
+  const { token } = parseCookies();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +51,7 @@ const AddStaff = () => {
             `${API_URL_STAFF}get-staff-user/${id}`,
             {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
@@ -128,7 +130,7 @@ const AddStaff = () => {
         if (isEditMode) {
           axios.put(`${API_URL_STAFF}update-staff-user/${id}`, payload, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${token}`
             }
           });
           alert("Staff updated successfully");
@@ -136,7 +138,7 @@ const AddStaff = () => {
         else {
           axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+              Authorization: `Bearer ${token}`
             }
           });
           alert("Staff added successfully");

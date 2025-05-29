@@ -13,6 +13,7 @@ import PageTitle from '../../components/PageTitle';
 import DataTable from '../../components/DataTable';
 import ActionButton from '../../components/ActionButton';
 import StatusBadge from '../../components/StatusBadge';
+import { parseCookies } from 'nookies';
 import axios from 'axios';
 
 const ManageUsers = () => {
@@ -22,6 +23,7 @@ const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { token } = parseCookies();
 
   // Delete user handler
   const handleDeleteUser = async (userId) => {
@@ -30,7 +32,7 @@ const ManageUsers = () => {
     try {
       const res = await axios.delete(`${API_URL}delete-user/${userId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         }
       });
 
@@ -85,7 +87,7 @@ const ManageUsers = () => {
       try {
         const res = await axios.post(`${API_URL}get-all-users`, {}, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         if (res.status === 200 && res.data.success === 1) {

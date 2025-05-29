@@ -55,7 +55,7 @@ const MyProfile = () => {
       <PageTitle title="My Profile" breadcrumbs={[{ text: "My Profile" }]} />
 
       <Row>
-        <Col lg={2} className="mb-4 d-flex align-items-center">
+        <Col lg={3} md={4} className="mb-4 d-flex align-items-center">
           <div
             onClick={() => document.getElementById("profileImage").click()}
             onDragOver={(e) => e.preventDefault()}
@@ -94,7 +94,7 @@ const MyProfile = () => {
           />
         </Col>
 
-        <Col lg={10}>
+        <Col lg={9} md={8}>
           <Card>
             <Card.Body>
               <Tab.Container defaultActiveKey="general">
@@ -143,7 +143,7 @@ const MyProfile = () => {
 
                         <Col md={12}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Phone No.</Form.Label>
+                            <Form.Label>Phone No.</Form.Label> 
                             <Form.Control
                               type="text"
                               name="phone"

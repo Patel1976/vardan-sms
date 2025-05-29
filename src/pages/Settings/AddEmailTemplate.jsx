@@ -12,12 +12,14 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import PageTitle from "../../components/PageTitle";
 import axios from 'axios';
+import { parseCookies } from "nookies";
 
 const AddEmailTemplate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL_EMAIL_TEMPLATES = import.meta.env.VITE_BASE_URL;
   const isEditMode = !!id;
+  const { token } = parseCookies();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,7 +78,7 @@ const AddEmailTemplate = () => {
         try {
           const response = await axios.post(`${API_URL_EMAIL_TEMPLATES}get-email-template/${id}`, {}, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${token}`,
             },
           });
           const templateData = response.data.data;
@@ -140,13 +142,13 @@ const AddEmailTemplate = () => {
         if (isEditMode) {
           await axios.put(`${API_URL_EMAIL_TEMPLATES}update-email-template`, payload, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${token}`,
             },
           });
         } else {
           await axios.post(`${API_URL_EMAIL_TEMPLATES}create-email-template`, payload, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${token}`,
             },
           });
         }

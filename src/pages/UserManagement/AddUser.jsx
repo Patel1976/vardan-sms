@@ -22,12 +22,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
 import axios from "axios";
+import { parseCookies } from "nookies";
 
 const AddUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_BASE_URL;
   const isEditMode = !!id;
+  const { token } = parseCookies();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -48,7 +50,7 @@ const AddUser = () => {
       axios
         .post(`${API_URL}get-user-by-id/${id}`, {}, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         })
         .then((response) => {
@@ -74,7 +76,7 @@ const AddUser = () => {
       try {
         const response = await axios.post(`${API_URL}get-all-roles`, {}, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         const fetchedRoles = response.data.data || [];
@@ -122,14 +124,14 @@ const AddUser = () => {
       if (isEditMode) {
         await axios.put(`${API_URL}update-user/${id}`, userPayload, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         alert("User updated successfully");
       } else {
         await axios.post(`${API_URL}create-user`, userPayload, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${token}`
           }
         });
         alert("User created successfully");
