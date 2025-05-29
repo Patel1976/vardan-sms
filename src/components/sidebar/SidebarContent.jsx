@@ -12,16 +12,17 @@ import {
   faExclamationTriangle,
   faClock,
   faCog,
+  faCube,
   faEnvelopeOpenText,
 } from "@fortawesome/free-solid-svg-icons";
 import { parseCookies } from 'nookies';
 
 const iconMap = {
   "tachometer-alt": faTachometerAlt,
-  "users": faUsers,
+  users: faUsers,
   "user-tie": faUserTie,
   "exclamation-triangle": faExclamationTriangle,
-  "cog": faCog
+  cog: faCog,
 };
 
 const SidebarContent = ({
@@ -56,8 +57,8 @@ const SidebarContent = ({
     <div className="sidebar-content">
       <ul className="nav flex-column">
         {menuData
-          .filter(module => module.parent_module_id === null)
-          .map(mainModule => {
+          .filter((module) => module.parent_module_id === null)
+          .map((mainModule) => {
             const icon = iconMap[mainModule.icon] || faCube;
             const subModules = mainModule.sub_modules || [];
 
@@ -85,7 +86,9 @@ const SidebarContent = ({
                     end
                   >
                     <FontAwesomeIcon icon={icon} />
-                    {isOpen && <span className="nav-text ms-2">{mainModule.name}</span>}
+                    {isOpen && (
+                      <span className="nav-text ms-2">{mainModule.name}</span>
+                    )}
                   </NavLink>
                 </li>
               );
