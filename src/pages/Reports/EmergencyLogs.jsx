@@ -12,7 +12,7 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import SearchStaff from "../../components/searchStaff";
-import axios from 'axios';
+import axios from "axios";
 
 const EmergencyLogs = () => {
   const navigate = useNavigate();
@@ -20,12 +20,12 @@ const EmergencyLogs = () => {
   const token = localStorage.getItem("token");
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [filterData, setFilterData] = useState({
-    fromDate: '',
-    toDate: '',
-    staffId: '',
+    fromDate: "",
+    toDate: "",
+    staffId: "",
   });
 
   const [staffList, setStaffList] = useState([]);
@@ -106,11 +106,15 @@ const EmergencyLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, {}, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
+        const response = await axios.post(
+          `${API_URL_STAFF}get-all-emergency-log`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         if (response.status === 200 && response.data.success === 1) {
           const formattedLogs = response.data.data.map((log) => ({
             id: log.id,
@@ -127,17 +131,15 @@ const EmergencyLogs = () => {
         } else {
           setError("Failed to fetch logs");
         }
-      }
-      catch (err) {
+      } catch (err) {
         console.error("Error fetching logs:", err);
         setError("An error occurred while fetching logs");
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchLogs();
-  }
-    , [API_URL_STAFF]);
+  }, [API_URL_STAFF]);
 
   return (
     <div className="emergency-logs">
@@ -182,13 +184,14 @@ const EmergencyLogs = () => {
               <Col md={4}>
                 <Form.Group className="mb-3" controlId="staffId">
                   <Form.Label>Staff Members</Form.Label>
-                  <SearchStaff
-                    token={token}
-                  />
+                  <SearchStaff token={token} />
                 </Form.Group>
               </Col>
 
-              <Col md={2} className="d-flex align-items-end mb-3">
+              <Col
+                md={2}
+                className="d-flex align-items-end mb-3 reports-btn-filter"
+              >
                 <Button variant="primary" type="submit" className="w-100">
                   <FontAwesomeIcon icon={faSearch} className="me-1" />
                   Filter

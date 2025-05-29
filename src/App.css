@@ -411,6 +411,7 @@
 .card:hover {
   transform: translateY(-2px);
   transition: all 0.5s ease;
+  z-index: 1;
 }
 
 .app.dark .card {
@@ -1032,8 +1033,8 @@
 }
 
 .form-check-input:checked {
-  background-color: rgb(244, 67, 54) !important;
-  border-color: rgb(244, 67, 54) !important;
+  background-color: #bd9a68 !important;
+  border-color: #bd9a68 !important;
 }
 .data-\[state\=checked\]\:bg-primary[data-state="checked"] {
   background-color: rgb(76, 175, 80) !important;
@@ -1203,6 +1204,25 @@
   color: #fff !important;
 }
 
+.css-1skhtxp-control {
+  border-color: #bd9a68 !important;
+  box-shadow: none !important;
+}
+
+.css-1nmdiq5-menu,
+.css-1nmdiq5-menu:hover {
+  z-index: 9999 !important;
+}
+
+.tl-staff-label.badge {
+  background-color: #222222 !important;
+  font-weight: 600;
+}
+
+.reports-btn-filter {
+  margin-bottom: 20px !important;
+}
+
 /* Dark mode */
 .app.dark .h1,
 .app.dark .h2,
@@ -1223,6 +1243,15 @@
 .app.dark .alert {
   background-color: #2a2a2a;
 }
+.app.dark .css-1l9nz1v-control,
+.app.dark .css-1skhtxp-control,
+.app.dark .css-1nmdiq5-menu {
+  background-color: #2a2a2a;
+  border-color: #333;
+}
+.app.dark .css-1skhtxp-control {
+  border-color: #333 !important;
+}
 .app.dark .btn-outline-secondary {
   color: #fff;
 }
@@ -1233,6 +1262,21 @@
 .dash-label,
 .app.dark .dash-label {
   color: #bd9a68;
+}
+.app.dark .staff-select__menu {
+  background-color: #222;
+  border-radius: 6px;
+  z-index: 10;
+}
+.staff-select__option--is-focused {
+  background-color: rgba(189, 154, 104, 0.15) !important;
+}
+.staff-select__option--is-selected {
+  background-color: rgba(189, 154, 104, 0.3) !important;
+  color: #333 !important;
+}
+.app.dark .staff-select__option--is-selected {
+  color: #fff !important;
 }
 
 /* Responsive */

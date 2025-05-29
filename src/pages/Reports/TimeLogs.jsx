@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Card, Form, Button, Row, Col, Badge, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faFileExport, faClock } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faFileExport,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
@@ -32,9 +36,13 @@ const TimeLogs = () => {
         toDate: filterData.toDate,
         token: token,
       };
-      const res = await axios.post(`${TIME_LOG_API}get-all-time-log`, requestData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.post(
+        `${TIME_LOG_API}get-all-time-log`,
+        requestData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setLogs(res.data.logs || []);
     } catch (error) {
       console.error("Failed to fetch all logs", error);
@@ -51,9 +59,13 @@ const TimeLogs = () => {
         toDate: filterData.toDate,
         token: token,
       };
-      const res = await axios.post(`${TIME_LOG_API}get-time-log/${staffId}`, requestData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.post(
+        `${TIME_LOG_API}get-time-log/${staffId}`,
+        requestData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setLogs(res.data.logs || []);
     } catch (error) {
       console.error("Failed to fetch staff logs", error);
@@ -160,7 +172,10 @@ const TimeLogs = () => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={2} className="d-flex align-items-end mb-3">
+              <Col
+                md={2}
+                className="d-flex align-items-end mb-3 reports-btn-filter"
+              >
                 <Button variant="primary" type="submit" className="w-100">
                   <FontAwesomeIcon icon={faSearch} className="me-1" />
                   Filter
@@ -177,7 +192,7 @@ const TimeLogs = () => {
             <FontAwesomeIcon icon={faClock} className="me-2" />
             Time Logs
             {selectedStaff?.label && (
-              <Badge bg="info" className="ms-2">
+              <Badge className="ms-2 tl-staff-label">
                 Filtered by Staff: {selectedStaff.label}
               </Badge>
             )}

@@ -65,7 +65,8 @@ const WorkJourney = () => {
         token: token,
       };
       const response = await axios.post(
-        `${API_URL_STAFF}get-staff-locations/${selectedStaff.uuid}`, requestData,
+        `${API_URL_STAFF}get-staff-locations/${selectedStaff.uuid}`,
+        requestData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -79,12 +80,12 @@ const WorkJourney = () => {
         const timestamp = Number(item.created_at?.$date?.$numberLong);
         const time = timestamp
           ? new Date(timestamp).toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
           : "Invalid Date";
         return {
           lat: Number(item.latitude),
@@ -98,7 +99,6 @@ const WorkJourney = () => {
       if (transformed.length > 0) {
         setMapCenter({ lat: transformed[0].lat, lng: transformed[0].lng });
       }
-
     } catch (error) {
       console.error("Error fetching journey data:", error);
       alert("Failed to fetch journey data.");
@@ -119,7 +119,10 @@ const WorkJourney = () => {
 
   return (
     <div className="work-journey">
-      <PageTitle title="Work Journey" breadcrumbs={[{ text: "Work Journey" }]} />
+      <PageTitle
+        title="Work Journey"
+        breadcrumbs={[{ text: "Work Journey" }]}
+      />
 
       {!showMap ? (
         <Card>
@@ -209,7 +212,6 @@ const WorkJourney = () => {
                   <Button
                     variant="primary"
                     onClick={handleFilterJourney}
-                    className="mb-3"
                     disabled={loading}
                   >
                     <FontAwesomeIcon icon={faSearch} className="me-1" />
@@ -244,7 +246,9 @@ const WorkJourney = () => {
                     </GoogleMap>
                   </div>
                 ) : (
-                  <Alert variant="warning">No journey data found for the selected filters.</Alert>
+                  <Alert variant="warning">
+                    No journey data found for the selected filters.
+                  </Alert>
                 )
               ) : (
                 <Alert variant="info">Loading map...</Alert>

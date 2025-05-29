@@ -44,23 +44,24 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
     };
 
     return (
-        <div className="form-group">
-            <Select
-                isClearable
-                menuPlacement="auto"
-                value={selectedOption}
-                onChange={handleSelectChange}
-                onInputChange={handleInputChange}
-                options={suggestions}
-                placeholder="Search Staff by Name..."
-                styles={{
-                    control: (provided) => ({
-                        ...provided,
-                        minWidth: '16rem',
-                    }),
-                }}
-            />
-        </div>
+      <div className="form-group">
+        <Select
+          isClearable
+          menuPlacement="auto"
+          value={selectedOption}
+          onChange={handleSelectChange}
+          onInputChange={handleInputChange}
+          options={suggestions}
+          placeholder="Search Staff by Name..."
+          classNamePrefix="staff-select"
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              minWidth: "16rem",
+            }),
+          }}
+        />
+      </div>
     );
 };
 
