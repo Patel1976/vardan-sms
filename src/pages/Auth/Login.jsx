@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +11,8 @@ import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [redirectNow, setRedirectNow] = useState(false);
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,7 +28,7 @@ const Login = () => {
     });
   };
 
-  const validateForm = () => {
+  const ValidationSchema = () => {
     const newErrors = {};
 
     if (!formData.email) {
@@ -47,19 +49,56 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const isValid = ValidationSchema();
+    if (!isValid) return;
 
-    if (validateForm()) {
-      // In a real app, you would handle authentication here
-      console.log("Form submitted:", formData);
-      const res = await axios.post(
-        `${REACT_BACKEND_URL}api/admin/auth/login/`,
-        formData
-      );
-      console.log(res);
+    try {
+      const res = await axios.post(`${API_URL}api/admin/auth/login`, {
+        email: formData.email,
+        password: formData.password,
+      });
 
-      navigate("/"); // Redirect to dashboard on successful login
+      if (res.status === 200 && res.data.success === 1) {
+        const { token, userData } = res.data.data;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", userData.email);
+        sessionStorage.setItem("Role", userData.id);
+
+        setRedirectNow(true);
+      }
+    } catch (error) {
+      const responseErrors = error.response?.data?.data?.errors;
+
+      if (responseErrors) {
+        const newErrors = {};
+        if (responseErrors.email) {
+          newErrors.email = responseErrors.email[0];
+        }
+        if (responseErrors.password) {
+          newErrors.password = responseErrors.password[0];
+        }
+        setErrors(newErrors);
+      } else if (
+        error.response?.data?.message === "Incorrect email or password"
+      ) {
+        setErrors({
+          email: "Incorrect Email!",
+          password: "Incorrect Password!",
+        });
+      } else {
+        console.error("Login error:", error);
+        setErrors({ general: "Login failed. Please try again later." });
+      }
     }
   };
+
+  useEffect(() => {
+    if (redirectNow) {
+      console.log("Redirecting to /");
+      navigate("/dashboard");
+    }
+  }, [redirectNow]);
 
   return (
     <div className="auth-page">
@@ -92,7 +131,7 @@ const Login = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter Your Email"
+                      placeholder="Enter your email"
                       isInvalid={!!errors.email}
                     />
                     <Form.Control.Feedback type="invalid">
@@ -112,7 +151,7 @@ const Login = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Enter Your Password"
+                      placeholder="Enter your password"
                       isInvalid={!!errors.password}
                     />
                     <Form.Control.Feedback type="invalid">
@@ -137,7 +176,7 @@ const Login = () => {
                 </Row>
 
                 <Button variant="primary" type="submit" className="w-100 mb-3">
-                  <FontAwesomeIcon icon={faSignInAlt} className="me-2" />
+                  <FontAwesomeIcon icon={faSignInAlt} className="me-1" />
                   Sign In
                 </Button>
               </Form>

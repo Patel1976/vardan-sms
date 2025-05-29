@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Form, Button, Tab, Nav, Image } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSave,
@@ -11,17 +11,49 @@ import {
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../../components/PageTitle";
+import axios from "axios";
+import { parseCookies } from "nookies";
+import { User } from "lucide-react";
 
 const MyProfile = () => {
-  const [formData, setFormData] = useState({
-    firstName: "Admin",
-    email: "admin@example.com",
-    phone: "+1 (123) 456-7890",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    profileImageUrl: "",
-  });
+  const navigate = useNavigate();
+  const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
+  const token = localStorage.getItem("token");
+  const [formData, setFormData] = useState({});
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.post(
+          `${API_URL_STAFF}user-profile`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (res.status === 200 && res.data.success === 1) {
+          const user = res.data.data;
+
+          setFormData({
+            id: user.id,
+            firstName: user.name || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            profileImageUrl: user.profileImage || "",
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+        } else {
+          console.error("Failed to load user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   // Handle profile image change
   const handleImageChange = (e) => {
@@ -43,11 +75,91 @@ const MyProfile = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would handle the profile update here
-    console.log("Form submitted:", formData);
-    alert("Profile updated successfully!");
+    try {
+      const payload = {
+        name: formData.firstName,
+        email: formData.email,
+        phone: formData.phone,
+      };
+      const res = await axios.put(
+        `${API_URL_STAFF}edit-profile/${formData.id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.status === 200 && res.data.success === 1) {
+        alert("Profile updated successfully!");
+      } else {
+        alert("Failed to update profile.");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("An error occurred while updating your profile.");
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (
+      !formData.currentPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
+      alert("Please fill in all password fields.");
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert("New password and confirm password do not match.");
+      return;
+    }
+
+    try {
+      const payload = {
+        current_password: formData.currentPassword,
+        password: formData.newPassword,
+        password_confirmation: formData.confirmPassword,
+      };
+
+      const res = await axios.put(
+        `${API_URL_STAFF}user/change-password/${formData.id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.status === 200 && res.data.success === 1) {
+        alert("Password updated successfully!");
+        setFormData((prev) => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        }));
+      } else {
+        alert(res.data?.message || "Failed to update password.");
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      if (error.response?.data?.data?.errors) {
+        const messages = Object.values(error.response.data.data.errors)
+          .flat()
+          .join("\n");
+        alert(messages);
+      } else {
+        alert("An error occurred while updating your password.");
+      }
+    }
   };
 
   return (
@@ -143,7 +255,7 @@ const MyProfile = () => {
 
                         <Col md={12}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Phone No.</Form.Label> 
+                            <Form.Label>Phone No.</Form.Label>
                             <Form.Control
                               type="text"
                               name="phone"
@@ -162,7 +274,7 @@ const MyProfile = () => {
                   </Tab.Pane>
 
                   <Tab.Pane eventKey="password">
-                    <Form onSubmit={handleSubmit} className="">
+                    <Form onSubmit={handlePasswordSubmit} className="">
                       <Form.Group className="mb-3">
                         <Form.Label>Current Password</Form.Label>
                         <Form.Control

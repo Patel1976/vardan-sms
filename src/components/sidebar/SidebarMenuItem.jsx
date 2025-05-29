@@ -28,11 +28,10 @@ const SidebarMenuItem = ({
   return (
     <li className="nav-item">
       <div
-        className={`nav-link submenu-toggler text-sidebar-foreground ${
-          isOpen
+        className={`nav-link submenu-toggler text-sidebar-foreground ${isOpen
             ? "active bg-sidebar-accent text-sidebar-accent-foreground"
             : ""
-        }`}
+          }`}
         onClick={() => toggleSubmenu(menuKey)}
       >
         <div>
@@ -52,17 +51,14 @@ const SidebarMenuItem = ({
           {submenuItems.map((item, index) => (
             <li key={index}>
               <NavLink
-                to={item.path}
-                onClick={() => handleSubmenuClick(item.path)}
+                to={`/${item.slug}`}
+                onClick={() => handleSubmenuClick(`/${item.slug}`)}
                 className={({ isActive }) =>
-                  `nav-link ${
-                    isActive
-                      ? "active text-sidebar-primary"
-                      : "text-sidebar-foreground"
+                  `nav-link ${isActive ? "active text-sidebar-primary" : "text-sidebar-foreground"
                   }`
                 }
               >
-                <span>{item.title}</span>
+                <span>{item.name}</span>
               </NavLink>
             </li>
           ))}

@@ -1,9 +1,11 @@
-// App.js
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+
+import React, { useState, useEffect, FC } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Navigate  } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Layout from './components/Layout';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -23,18 +25,40 @@ import NotFound from './pages/NotFound';
 
 const AppContent = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [theme, setTheme] = useState('light');
 
   const isAuthPage = ['/login', '/lock-screen'].includes(location.pathname);
 
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
-  const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   useEffect(() => {
     document.body.classList.remove('light', 'dark');
     document.body.classList.add(theme);
   }, [theme]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const emailSaved = localStorage.getItem('email');
+    const publicRoutes = ['/login', '/lock-screen'];
+
+    if (!token && !publicRoutes.includes(location.pathname)) {
+      if (emailSaved) {
+        navigate('/lock-screen', { replace: true });
+      } else {
+        alert('You are not authenticated. Please log in.');
+        navigate('/login', { replace: true });
+      }
+    }
+  }, [location.pathname]);
 
   if (isAuthPage) {
     return (
@@ -56,20 +80,38 @@ const AppContent = () => {
         toggleTheme={toggleTheme}
       >
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<ManageUsers />} />
-          <Route path="/users/add-user" element={<AddUser />} />
-          <Route path="/users/edit-user/:id" element={<AddUser />} />
-          <Route path="/staff" element={<ManageStaff />} />
-          <Route path="/staff/add-staff" element={<AddStaff />} />
-          <Route path="/staff/edit-staff/:id" element={<AddStaff />} />
-          <Route path="/workjourney" element={<WorkJourney />} />
-          <Route path="/emergency-logs" element={<EmergencyLogs />} />
-          <Route path="/timelogs" element={<TimeLogs />} />
-          <Route path="/email-templates" element={<EmailTemplates />} />
-          <Route path="/email-templates/add-email-template" element={<AddEmailTemplate />} />
-          <Route path="/email-templates/edit-email-template/:id" element={<AddEmailTemplate />} />
-          <Route path="/profile" element={<MyProfile />} />
+          {/* Redirect root path based on auth status */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          {/* Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/lock-screen" element={<LockScreen />} />
+
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
+          <Route path="/users" element={<ProtectedRoute element={<ManageUsers />} />} />
+          <Route path="/users/add-user" element={<ProtectedRoute element={<AddUser />} />} />
+          <Route path="/users/edit-user/:id" element={<ProtectedRoute element={<AddUser />} />} />
+          <Route path="/staff" element={<ProtectedRoute element={<ManageStaff />} />} />
+          <Route path="/staff/add-staff" element={<ProtectedRoute element={<AddStaff />} />} />
+          <Route path="/staff/edit-staff/:id" element={<ProtectedRoute element={<AddStaff />} />} />
+          <Route path="/workjourney" element={<ProtectedRoute element={<WorkJourney />} />} />
+          <Route path="/emergency-logs" element={<ProtectedRoute element={<EmergencyLogs />} />} />
+          <Route path="/timelogs" element={<ProtectedRoute element={<TimeLogs />} />} />
+          <Route path="/email-template" element={<ProtectedRoute element={<EmailTemplates />} />} />
+          <Route path="/email-template/add" element={<ProtectedRoute element={<AddEmailTemplate />} />} />
+          <Route path="/email-template/edit/:id" element={<ProtectedRoute element={<AddEmailTemplate />} />} />
+          <Route path="/profile" element={<ProtectedRoute element={<MyProfile />} />} />
+
+          {/* Fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
@@ -77,10 +119,14 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <Router>
-    <AppContent />
-  </Router>
-);
+const App: FC = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
+  );
+};
 
 export default App;
