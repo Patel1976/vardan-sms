@@ -29,18 +29,14 @@ const Sidebar = ({ isOpen, setIsOpen, setSidebarOpen, setHovering, theme }) => {
   // Check the current path and expand the relevant menu
   useEffect(() => {
     const currentPath = location.pathname;
-
-    setExpandedMenus((prev) => ({
-      ...prev,
-      userManagement:
-        currentPath.includes("/users") || currentPath.includes("/roles"),
-      staffManagement:
-        currentPath.includes("/staff") || currentPath.includes("/workjourney"),
-      reports:
-        currentPath.includes("/emergency-logs") ||
-        currentPath.includes("/timelogs"),
-      settings: currentPath.includes("/email-templates"),
-    }));
+    setExpandedMenus((prev) => {
+      return {
+        "User Managment": currentPath.startsWith("/users"),
+        "Staff Managment": currentPath.startsWith("/staff") || currentPath.startsWith("/workjourney"),
+        Reports: currentPath.startsWith("/emergency-logs") || currentPath.startsWith("/timelogs"),
+        Settings: currentPath.startsWith("/email-template"),
+      };
+    });
   }, [location.pathname]);
 
   const toggleSubmenu = (menu) => {
@@ -60,9 +56,8 @@ const Sidebar = ({ isOpen, setIsOpen, setSidebarOpen, setHovering, theme }) => {
     <aside
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`sidebar bg-sidebar text-sidebar-foreground ${
-        !isOpen ? "mini" : ""
-      } ${isMobile && isOpen ? "mobile-open" : ""}`}
+      className={`sidebar bg-sidebar text-sidebar-foreground ${!isOpen ? "mini" : ""
+        } ${isMobile && isOpen ? "mobile-open" : ""}`}
     >
       <SidebarHeader
         isOpen={isOpen}

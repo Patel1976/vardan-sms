@@ -23,6 +23,7 @@ import axios from 'axios';
 const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const API_URL = import.meta.env.VITE_BASE_URL;
   const [userName, setUserName] = useState('');
+  const [userImage, setUserImage] = useState('');
   const isMounted = useRef(false);
   const { token } = parseCookies();
 
@@ -54,6 +55,11 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
         if (response.status === 200 && response.data.success === 1) {
           const user = response.data.data;
           setUserName(user.name);
+          setUserImage(
+            user.image
+              ? `data:image/jpeg;base64,${user.image}`
+              : '/placeholder.png'
+          );
           sessionStorage.setItem('Role', response.data.role);
           sessionStorage.setItem('LoggedInUserId', user.id);
 
@@ -108,7 +114,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
             >
               <div className="user-avatar-container">
                 <img
-                  src="/public/profile.jpg"
+                  src={userImage}
                   alt="User"
                   className="user-avatar"
                 />
