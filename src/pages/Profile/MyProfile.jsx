@@ -14,47 +14,29 @@ import PageTitle from "../../components/PageTitle";
 import axios from "axios";
 import { parseCookies } from "nookies";
 import { User } from "lucide-react";
+import { useUser } from '../../context/UserContext';
 
 const MyProfile = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
   const { token } = parseCookies();
+  const { user, setUser } = useUser();
   const [formData, setFormData] = useState({});
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await axios.post(
-          `${API_URL_STAFF}user-profile`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (res.status === 200 && res.data.success === 1) {
-          const user = res.data.data;
-
-          setFormData({
-            id: user.id,
-            firstName: user.name || "",
-            email: user.email || "",
-            phone: user.phone || "",
-            profileImageBase64: user.image || "",
-            profileImageFile: null,
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-          });
-        } else {
-          console.error("Failed to load user data");
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetchUserData();
-  }, []);
+    if (user) {
+      setFormData({
+        id: user.id,
+        firstName: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        profileImageBase64: user.image || "",
+        profileImageFile: null,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }
+  }, [user]);
 
   // Handle profile image change
   const handleImageChange = (e) => {
@@ -100,6 +82,13 @@ const MyProfile = () => {
       );
       if (res.status === 200 && res.data.success === 1) {
         alert("Profile updated successfully!");
+        setUser((prevUser) => ({
+          ...prevUser,
+          name: formData.firstName,
+          email: formData.email,
+          phone: formData.phone,
+          image: formData.profileImageBase64 || prevUser.image,
+        }));
       } else {
         alert("Failed to update profile.");
       }

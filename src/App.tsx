@@ -25,6 +25,7 @@ import LockScreen from './pages/Auth/LockScreen';
 import ForgetPassword from './pages/Auth/ForgetPassword';
 import ResetPassword from './pages/Auth/ResetPassword';
 import NotFound from './pages/NotFound';
+import { UserProvider } from './context/UserContext';
 
 const AppContent = () => {
   const location = useLocation();
@@ -134,9 +135,11 @@ const AppContent = () => {
 const App: FC = () => {
   return (
     <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <UserProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </UserProvider>
     </AuthProvider>
   );
 };
