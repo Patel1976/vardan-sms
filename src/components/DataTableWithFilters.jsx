@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Form,
@@ -7,9 +6,9 @@ import {
   Col,
   Button,
   InputGroup,
-  Pagination
-} from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+  Pagination,
+} from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
   faFilter,
@@ -17,8 +16,8 @@ import {
   faChevronLeft,
   faChevronRight,
   faAngleDoubleLeft,
-  faAngleDoubleRight
-} from '@fortawesome/free-solid-svg-icons';
+  faAngleDoubleRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 const DataTableWithFilters = ({
   columns,
@@ -30,20 +29,20 @@ const DataTableWithFilters = ({
   noDataMessage = "No data available",
   className = "",
   filterLayout = "inline",
-  showSearch = true
+  showSearch = true,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(itemsPerPageOptions[0]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filterValues, setFilterValues] = useState({});
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter data based on search term and filters
-  const filteredData = data.filter(item => {
+  const filteredData = data.filter((item) => {
     // Search term filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = columns.some(col => {
+      const matchesSearch = columns.some((col) => {
         const value = item[col.field];
         return value && value.toString().toLowerCase().includes(searchLower);
       });
@@ -101,16 +100,16 @@ const DataTableWithFilters = ({
 
   // Handle filter change
   const handleFilterChange = (field, value) => {
-    setFilterValues(prev => ({
+    setFilterValues((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   // Clear all filters
   const handleClearFilters = () => {
     setFilterValues({});
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   // Render filter section
@@ -118,15 +117,21 @@ const DataTableWithFilters = ({
     if (filters.length === 0) return null;
 
     return (
-      <div className={`data-table-filters ${showFilters || filterLayout === "inline" ? '' : 'd-none'}`}>
+      <div
+        className={`data-table-filters ${
+          showFilters || filterLayout === "inline" ? "" : "d-none"
+        }`}
+      >
         <Row className="g-3">
           {filters.map((filter, index) => (
             <Col md={filter.width || 6} lg={filter.width || 4} key={index}>
               <Form.Group>
                 <Form.Label>{filter.label}</Form.Label>
                 <Form.Select
-                  onChange={(e) => handleFilterChange(filter.field, e.target.value)}
-                  value={filterValues[filter.field] || ''}
+                  onChange={(e) =>
+                    handleFilterChange(filter.field, e.target.value)
+                  }
+                  value={filterValues[filter.field] || ""}
                   className="shadow-sm"
                 >
                   <option value="">All {filter.label}s</option>
@@ -192,15 +197,11 @@ const DataTableWithFilters = ({
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <FontAwesomeIcon icon={faFilter} className="me-1" />
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
+                {showFilters ? "Hide Filters" : "Show Filters"}
               </Button>
             )}
 
-            {actions && (
-              <div>
-                {actions}
-              </div>
-            )}
+            {actions && <div>{actions}</div>}
           </Col>
         </Row>
 
@@ -214,7 +215,7 @@ const DataTableWithFilters = ({
           <thead>
             <tr>
               {columns.map((column, index) => (
-                <th key={index} className={column.className || ''}>
+                <th key={index} className={column.className || ""}>
                   {column.header}
                 </th>
               ))}
@@ -225,7 +226,7 @@ const DataTableWithFilters = ({
               currentItems.map((item, rowIndex) => (
                 <tr key={rowIndex}>
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className={column.className || ''}>
+                    <td key={colIndex} className={column.className || ""}>
                       {column.render
                         ? column.render(item[column.field], item, rowIndex)
                         : item[column.field]}
@@ -255,9 +256,9 @@ const DataTableWithFilters = ({
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
               }}
-              style={{ width: 'auto', display: 'inline-block' }}
+              style={{ width: "auto", display: "inline-block" }}
             >
-              {itemsPerPageOptions.map(option => (
+              {itemsPerPageOptions.map((option) => (
                 <option key={option} value={option}>
                   {option} per page
                 </option>
@@ -281,7 +282,9 @@ const DataTableWithFilters = ({
 
             {startPage > 1 && (
               <>
-                <Pagination.Item onClick={() => handlePageChange(1)}>1</Pagination.Item>
+                <Pagination.Item onClick={() => handlePageChange(1)}>
+                  1
+                </Pagination.Item>
                 {startPage > 2 && <Pagination.Ellipsis />}
               </>
             )}
@@ -312,7 +315,9 @@ const DataTableWithFilters = ({
           </Pagination>
 
           <div className="showing-entries">
-            Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+            Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to{" "}
+            {Math.min(indexOfLastItem, filteredData.length)} of{" "}
+            {filteredData.length} entries
           </div>
         </div>
       )}
