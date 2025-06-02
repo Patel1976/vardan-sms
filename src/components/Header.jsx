@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,25 +8,18 @@ import {
   faBars,
   faUser,
   faSignOutAlt,
-  faCog,
   faMoon,
   faSun,
-  faLock,
-  faUserCog,
-  faEnvelope,
-  faBell
 } from '@fortawesome/free-solid-svg-icons';
 import { parseCookies, destroyCookie } from 'nookies';
 import axios from 'axios';
-
-
+import { useUser } from '../context/UserContext';
 
 const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const API_URL = import.meta.env.VITE_BASE_URL;
-  const [userName, setUserName] = useState('');
-  const [userImage, setUserImage] = useState('');
-  const isMounted = useRef(false);
   const { token } = parseCookies();
+  const { user } = useUser();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -38,44 +32,16 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
       localStorage.removeItem("email");
       sessionStorage.removeItem("Role");
       destroyCookie(null, 'token');
-      window.location.href = '/login';
+      navigate('/login');
     } catch (error) {
       console.error("Logout failed:", error);
     }
   };
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.post(`${API_URL}user-profile`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const userName = user?.name;
+  const userImage = user?.image
+    ? `data:image/jpeg;base64,${user.image}`
+    : '/placeholder.png';
 
-        if (response.status === 200 && response.data.success === 1) {
-          const user = response.data.data;
-          setUserName(user.name);
-          setUserImage(
-            user.image
-              ? `data:image/jpeg;base64,${user.image}`
-              : '/placeholder.png'
-          );
-          sessionStorage.setItem('Role', response.data.role);
-          sessionStorage.setItem('LoggedInUserId', user.id);
-
-          const encodedPermissions = btoa(JSON.stringify(response.data.permissions));
-          sessionStorage.setItem('Permissions', encodedPermissions);
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
-    };
-
-    if (!isMounted.current) {
-      fetchUser();
-      isMounted.current = true;
-    }
-  }, [API_URL]);
   return (
     <header className="header" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
       <div className="d-flex align-items-center">
