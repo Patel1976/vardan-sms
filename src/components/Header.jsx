@@ -139,12 +139,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
               My Profile
             </Dropdown.Item>
 
-            <Dropdown.Item as={Link} to="/lock-screen">
-              <FontAwesomeIcon icon={faLock} className="me-2" />
-              Lock Screen
-            </Dropdown.Item>
-
-            <Dropdown.Divider />
+            <Dropdown.Divider className='m-0' />
 
             <Dropdown.Item onClick={handleLogout} className="text-danger">
               <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />

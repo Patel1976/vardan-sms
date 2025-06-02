@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Form, Button, Row, Col, Modal, Image } from "react-bootstrap";
+import { Card, Form, Button, Row, Col, Modal, Image, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -280,7 +280,11 @@ const EmergencyLogs = () => {
           Emergency Logs List
         </Card.Header>
         <Card.Body>
-          <DataTable columns={columns} data={logs} showSearch={false} />
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <DataTable columns={columns} data={logs} showSearch={false} />
+          )}
         </Card.Body>
       </Card>
 
