@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Button, Badge } from "react-bootstrap";
+import { Card, Button, Badge, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
@@ -26,12 +26,12 @@ const ManageStaff = () => {
   // Delete staff handler
   const handleDeleteStaff = async (staffId) => {
     if (!window.confirm("Are you sure you want to delete this staff member?")) return;
-    try{
+    try {
       const res = await axios.delete(`${API_URL_STAFF}delete-staff-user/${staffId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
-    });
+      });
       if (res.status === 200 && res.data.success === 1) {
         alert("Staff member deleted successfully");
         setStaffMembers(staffMembers.filter(staff => staff.id !== staffId));
@@ -151,7 +151,11 @@ const ManageStaff = () => {
         </Card.Header>
 
         <Card.Body>
-          <DataTable columns={columns} data={staffMembers} />
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <DataTable columns={columns} data={staffMembers} />
+          )}
         </Card.Body>
       </Card>
     </div>

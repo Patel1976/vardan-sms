@@ -30,8 +30,6 @@ const Dashboard = () => {
   const { token } = parseCookies();
 
   useEffect(() => {
-    // Base URL of your Laravel backend API
-
     // Fetch all data in parallel
     const fetchDashboardData = async () => {
       try {
@@ -162,8 +160,7 @@ const Dashboard = () => {
                   className={`alert alert-${note.type} mb-3`}
                   role="alert"
                 >
-                  <strong>{note.staffName}</strong> {note.message}{" "}
-                  <strong>{note.location}</strong> - {note.time}
+                  <strong>{note.staffName}</strong> {note.description}{" "} - {note.time}
                 </div>
               ))}
             </Card.Body>

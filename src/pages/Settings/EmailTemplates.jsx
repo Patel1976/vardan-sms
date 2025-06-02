@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
@@ -129,7 +129,11 @@ const EmailTemplates = () => {
         </Card.Header>
 
         <Card.Body>
-          <DataTable columns={columns} data={templates} />
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <DataTable columns={columns} data={templates} />
+          )}
         </Card.Body>
       </Card>
     </div>
