@@ -59,7 +59,7 @@ const EmergencyLogs = () => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        staffName: log.user_id,
+        staffName: log.staff_name,
         description: log.description,
         image: log.image || "",
       }));
@@ -87,7 +87,23 @@ const EmergencyLogs = () => {
           },
         }
       );
-      setLogs(response.data.logs || []);
+      const rawLogs = response.data.images?.data || [];
+      const formattedLogs = rawLogs.map(log => ({
+        id: log.id,
+        date: new Date(log.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: new Date(log.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        staffName: log.staff_name,
+        description: log.description,
+        image: log.image || "",
+      }));
+      setLogs(formattedLogs);
     } catch (err) {
       console.error("Failed to fetch staff logs", error);
     } finally {
