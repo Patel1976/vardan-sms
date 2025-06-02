@@ -48,11 +48,15 @@ const AddUser = () => {
   useEffect(() => {
     if (isEditMode) {
       axios
-        .post(`${API_URL}get-user-by-id/${id}`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        .post(
+          `${API_URL}get-user-by-id/${id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        })
+        )
         .then((response) => {
           const user = response.data.data;
           setFormData((prevData) => ({
@@ -74,11 +78,15 @@ const AddUser = () => {
 
     const fetchRoles = async () => {
       try {
-        const response = await axios.post(`${API_URL}get-all-roles`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.post(
+          `${API_URL}get-all-roles`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
         const fetchedRoles = response.data.data || [];
         setRoles(fetchedRoles);
       } catch (error) {
@@ -124,23 +132,22 @@ const AddUser = () => {
       if (isEditMode) {
         await axios.put(`${API_URL}update-user/${id}`, userPayload, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         alert("User updated successfully");
       } else {
         await axios.post(`${API_URL}create-user`, userPayload, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         alert("User created successfully");
       }
       navigate("/users");
     } catch (err) {
       const msg =
-        err.response?.data?.message ||
-        "Failed to save user. Please try again.";
+        err.response?.data?.message || "Failed to save user. Please try again.";
       alert(msg);
     }
   };
@@ -149,10 +156,7 @@ const AddUser = () => {
     <div className="add-user">
       <PageTitle
         title={isEditMode ? "Edit User" : "Add User"}
-        breadcrumbs={[
-          { text: "User Management", link: "/users" },
-          { text: isEditMode ? "Edit User" : "Add User" },
-        ]}
+        breadcrumbs={[{ text: isEditMode ? "Edit User" : "Add User" }]}
       />
 
       <Card>

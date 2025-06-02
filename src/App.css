@@ -220,7 +220,6 @@
 .nav-link.active,
 .nav-link:hover,
 .submenu-toggler.active {
-  background-color: rgba(189, 154, 104, 0.15);
   color: #ffffff !important;
 }
 
@@ -246,10 +245,14 @@
   padding-left: 45px;
   font-size: 15px;
 }
+.nav-item div.active,
+.nav-item .dashboard-menu-link.active {
+  background-color: rgba(189, 154, 104, 0.15);
+  color: #fff;
+}
 
 .submenu .nav-link.active,
 .submenu .nav-link:hover {
-  background-color: rgba(189, 154, 104, 0.15);
   color: #fff;
 }
 
@@ -307,7 +310,6 @@
   background-color: #222;
   border-color: #333;
   color: #b0b0b0;
-  position: fixed;
   bottom: 0;
   width: 100%;
 }
@@ -409,9 +411,11 @@
 }
 
 .card:hover {
+  z-index: 1;
+}
+.dashboard .card:hover {
   transform: translateY(-2px);
   transition: all 0.5s ease;
-  z-index: 1;
 }
 
 .app.dark .card {
@@ -435,33 +439,25 @@
 /* Buttons */
 .btn-primary {
   background-color: #bd9a68 !important;
-  /* Theme color applied */
   border-color: #bd9a68 !important;
-  /* Theme color applied */
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
   background-color: #a68658 !important;
-  /* Darker theme color for hover */
   border-color: #a68658 !important;
-  /* Darker theme color for hover */
 }
 
 .btn-accent {
   background-color: #bd9a68 !important;
-  /* Theme color applied */
   border-color: #bd9a68 !important;
-  /* Theme color applied */
   color: #fff !important;
 }
 
 .btn-accent:hover,
 .btn-accent:focus {
   background-color: #a68658 !important;
-  /* Darker theme color for hover */
   border-color: #a68658 !important;
-  /* Darker theme color for hover */
 }
 
 /* DataTables */
@@ -629,9 +625,7 @@
 
 .page-item.active .page-link {
   background-color: #bd9a68;
-  /* Theme color applied */
   border-color: #bd9a68;
-  /* Theme color applied */
 }
 
 .app.dark .page-link {
@@ -642,9 +636,7 @@
 
 .app.dark .page-item.active .page-link {
   background-color: #bd9a68;
-  /* Theme color applied */
   border-color: #bd9a68;
-  /* Theme color applied */
   color: #fff;
 }
 
@@ -1223,6 +1215,12 @@
   margin-bottom: 20px !important;
 }
 
+.photo-column {
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+}
+
 /* Dark mode */
 .app.dark .h1,
 .app.dark .h2,
@@ -1296,5 +1294,10 @@
     text-align: center;
     height: 30px;
     padding: 0;
+  }
+  .photo-column {
+    width: auto;
+    min-width: auto;
+    max-width: auto;
   }
 }

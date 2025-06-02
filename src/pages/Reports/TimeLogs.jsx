@@ -176,6 +176,16 @@ const TimeLogs = () => {
         <Card.Body>
           <Form onSubmit={handleFilterSubmit}>
             <Row>
+              <Col md={4}>
+                <Form.Group controlId="staffId" className="mb-3">
+                  <Form.Label>Staff Members</Form.Label>
+                  <SearchStaff
+                    onSelectedOptionsChange={handleStaffSelect}
+                    token={token}
+                  />
+                </Form.Group>
+              </Col>
+
               <Col md={3}>
                 <Form.Group controlId="fromDate" className="mb-3">
                   <Form.Label>From Date</Form.Label>
@@ -198,15 +208,7 @@ const TimeLogs = () => {
                   />
                 </Form.Group>
               </Col>
-              <Col md={4}>
-                <Form.Group controlId="staffId" className="mb-3">
-                  <Form.Label>Staff Members</Form.Label>
-                  <SearchStaff
-                    onSelectedOptionsChange={handleStaffSelect}
-                    token={token}
-                  />
-                </Form.Group>
-              </Col>
+
               <Col
                 md={2}
                 className="d-flex align-items-end mb-3 reports-btn-filter"
