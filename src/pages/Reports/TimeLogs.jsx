@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Form, Button, Row, Col, Badge, Spinner } from "react-bootstrap";
+import { Card, Form, Button, Row, Col, Badge, Spinner, OverlayTrigger, Popover } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -36,8 +36,8 @@ const TimeLogs = () => {
     try {
       setLoading(true);
       const requestData = {
-        fromDate: filterData.fromDate,
-        toDate: filterData.toDate,
+        start_date: filterData.fromDate,
+        end_date: filterData.toDate,
         token: token,
       };
       const res = await axios.post(
@@ -59,8 +59,8 @@ const TimeLogs = () => {
     try {
       setLoading(true);
       const requestData = {
-        fromDate: filterData.fromDate,
-        toDate: filterData.toDate,
+        start_date: filterData.fromDate,
+        end_date: filterData.toDate,
         token: token,
       };
       const res = await axios.post(
@@ -70,7 +70,7 @@ const TimeLogs = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setLogs(res.data.logs || []);
+      setLogs(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch staff logs", error);
     } finally {
@@ -79,8 +79,8 @@ const TimeLogs = () => {
   };
 
   useEffect(() => {
-    if (staffIdFromUrl) {
-      fetchStaffLogs(staffIdFromUrl);
+    if (selectedStaff?.value) {
+      fetchStaffLogs(selectedStaff.value);
     } else {
       fetchAllLogs();
     }
@@ -126,8 +126,35 @@ const TimeLogs = () => {
     { field: "staff_name", header: "Staff Name" },
     { field: "check_in", header: "Check In" },
     { field: "check_out", header: "Check Out" },
+    {
+      field: "formatted_punches",
+      header: "Punches",
+      render: (row, fullRow) => {
+        const formattedPunches = fullRow?.formatted_punches || row;
+        if (!formattedPunches || typeof formattedPunches !== "string" || formattedPunches.trim() === "") {
+          return <span style={{ opacity: 0.5 }}>-</span>;
+        }
+        const punchItems = formattedPunches.split(',').map(p => p.trim());
+
+        const popover = (
+          <Popover id={`popover-punches-${fullRow?.id || Math.random()}`}>
+            <Popover.Body>
+              {punchItems.join(', ')}
+            </Popover.Body>
+          </Popover>
+        );
+
+        return (
+          <OverlayTrigger trigger={['hover', 'focus']} placement="top" overlay={popover}>
+            <span style={{ cursor: 'pointer' }}>
+              <FontAwesomeIcon icon={faClock} />
+            </span>
+          </OverlayTrigger>
+        );
+      }
+    },
     { field: "total_hours", header: "Total Hours" },
-    { field: "work_location", header: "Location" },
+    { field: "break_hours", header: "Break Hours" },
   ];
 
   const tableActions = (

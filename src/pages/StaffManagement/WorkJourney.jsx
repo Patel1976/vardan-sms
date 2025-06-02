@@ -22,7 +22,8 @@ const libraries = ["places"];
 const WorkJourney = () => {
   const [staffList, setStaffList] = useState([]);
   const [selectedStaff, setSelectedStaff] = useState("");
-  const [dateRange, setDateRange] = useState({ fromDate: "", toDate: "" });
+  const today = new Date().toISOString().split("T")[0];
+  const [dateRange, setDateRange] = useState({ fromDate: today, toDate: today });
   const [showMap, setShowMap] = useState(false);
   const [journeyPath, setJourneyPath] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
@@ -44,7 +45,17 @@ const WorkJourney = () => {
       [name]: value,
     });
   };
+  const isDateRangeValid = () => {
+    const { fromDate, toDate } = dateRange;
+    if (!fromDate || !toDate) return true;
 
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    return diffDays <= 7;
+  };
   const handleBack = () => {
     setShowMap(false);
     setJourneyPath([]);
@@ -110,11 +121,19 @@ const WorkJourney = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isDateRangeValid()) {
+      alert("Please select a date range of 7 days or less.");
+      return;
+    }
     await fetchJourneyData();
     setShowMap(true);
   };
 
   const handleFilterJourney = async () => {
+    if (!isDateRangeValid()) {
+      alert("Please select a date range of 7 days or less.");
+      return;
+    }
     await fetchJourneyData();
   };
 

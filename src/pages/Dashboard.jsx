@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,45 +11,56 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import PageTitle from "../components/PageTitle";
 import CountUp from "react-countup";
+import axios from "axios";
+import { parseCookies } from "nookies";
+
+const iconMap = {
+  faUsers: faUsers,
+  faUserTie: faUserTie,
+  faClipboardList: faClipboardList,
+  faExclamationTriangle: faExclamationTriangle,
+};
 
 const Dashboard = () => {
-  useEffect(() => {});
+  // State for each API data
+  const [stats, setStats] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const API_BASE = import.meta.env.VITE_BASE_URL;
+  const { token } = parseCookies();
 
-  // Sample stats
-  const stats = [
-    {
-      title: "Total Staff",
-      value: 125,
-      icon: faUsers,
-      color: "#bd9a68",
-      background: "rgb(189 154 104 / 20%)",
-      border: "1px solid rgb(189 154 104 / 30%)",
-    },
-    {
-      title: "Active Staff",
-      value: 87,
-      icon: faUserTie,
-      color: "#4caf50",
-      background: "rgb(76 175 80 / 20%)",
-      border: "1px solid rgb(76 175 80 / 30%)",
-    },
-    {
-      title: "Time Logs Today",
-      value: 254,
-      icon: faClipboardList,
-      color: "#2196f3",
-      background: "rgb(33 150 243 / 20%)",
-      border: "1px solid rgb(33 150 243 / 30%)",
-    },
-    {
-      title: "Emergency Alerts",
-      value: 3,
-      icon: faExclamationTriangle,
-      color: "#f44336",
-      background: "rgb(244 67 54 / 20%)",
-      border: "1px solid rgb(244 67 54 / 30%)",
-    },
-  ];
+  useEffect(() => {
+    // Fetch all data in parallel
+    const fetchDashboardData = async () => {
+      try {
+        const [statsRes, activitiesRes, notificationsRes] = await Promise.all([
+          axios.get(`${API_BASE}stats`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get(`${API_BASE}recent-activities`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          axios.get(`${API_BASE}emergency-notifications`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+
+        setStats(statsRes.data);
+        setActivities(activitiesRes.data);
+        setNotifications(notificationsRes.data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="dashboard">
@@ -90,7 +101,7 @@ const Dashboard = () => {
                         }}
                       >
                         <FontAwesomeIcon
-                          icon={stat.icon}
+                          icon={iconMap[stat.icon]}
                           style={{
                             width: 40,
                             height: 40,
@@ -112,9 +123,7 @@ const Dashboard = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow mb-4">
             <Card.Header className="py-3">
-              <h6 className="m-0 font-weight-bold text-s">
-                Recent Staff Activity
-              </h6>
+              <h6 className="m-0 font-weight-bold text-s">Recent Staff Activity</h6>
             </Card.Header>
             <Card.Body>
               <table className="table">
@@ -126,26 +135,13 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>John Doe</td>
-                    <td>Checked in</td>
-                    <td>Today, 09:15 AM</td>
-                  </tr>
-                  <tr>
-                    <td>Jane Smith</td>
-                    <td>Checked out</td>
-                    <td>Today, 05:30 PM</td>
-                  </tr>
-                  <tr>
-                    <td>Michael Johnson</td>
-                    <td>Reported emergency</td>
-                    <td>Today, 02:45 PM</td>
-                  </tr>
-                  <tr>
-                    <td>Linda Williams</td>
-                    <td>Checked in</td>
-                    <td>Today, 08:50 AM</td>
-                  </tr>
+                  {activities.map((activity, index) => (
+                    <tr key={index}>
+                      <td>{activity.staffName}</td>
+                      <td>{activity.activity}</td>
+                      <td>{activity.time}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </Card.Body>
@@ -155,23 +151,18 @@ const Dashboard = () => {
         <Col lg={6} className="mb-4">
           <Card className="shadow mb-4">
             <Card.Header className="py-3">
-              <h6 className="m-0 font-weight-bold text-s">
-                Emergency Notifications
-              </h6>
+              <h6 className="m-0 font-weight-bold text-s">Emergency Notifications</h6>
             </Card.Header>
             <Card.Body>
-              <div className="alert alert-danger mb-3">
-                <strong>Michael Johnson</strong> reported an emergency at{" "}
-                <strong>Main St. Location</strong> - 02:45 PM
-              </div>
-              <div className="alert alert-warning mb-3">
-                <strong>Susan Miller</strong> requested assistance at{" "}
-                <strong>Downtown Office</strong> - 11:20 AM
-              </div>
-              <div className="alert alert-danger mb-3">
-                <strong>Robert Brown</strong> reported an emergency at{" "}
-                <strong>Warehouse B</strong> - Yesterday, 4:30 PM
-              </div>
+              {notifications.map((note, index) => (
+                <div
+                  key={index}
+                  className={`alert alert-${note.type} mb-3`}
+                  role="alert"
+                >
+                  <strong>{note.staffName}</strong> {note.description}{" "} - {note.time}
+                </div>
+              ))}
             </Card.Body>
           </Card>
         </Col>

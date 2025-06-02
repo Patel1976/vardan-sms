@@ -40,7 +40,8 @@ const MyProfile = () => {
             firstName: user.name || "",
             email: user.email || "",
             phone: user.phone || "",
-            profileImageUrl: user.profileImage || "",
+            profileImageBase64: user.image || "",
+            profileImageFile: null,
             currentPassword: "",
             newPassword: "",
             confirmPassword: "",
@@ -59,9 +60,13 @@ const MyProfile = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setFormData((prev) => ({ ...prev, profileImageFile: file }));
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFormData({ ...formData, profileImageUrl: event.target.result });
+        setFormData((prev) => ({
+          ...prev,
+          profileImageBase64: event.target.result.split(",")[1],
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -82,6 +87,7 @@ const MyProfile = () => {
         name: formData.firstName,
         email: formData.email,
         phone: formData.phone,
+        ...(formData.profileImageBase64 && { image: formData.profileImageBase64 }),
       };
       const res = await axios.put(
         `${API_URL_STAFF}edit-profile/${formData.id}`,
@@ -178,9 +184,13 @@ const MyProfile = () => {
             }}
             className="upload-profile"
           >
-            {formData.profileImageUrl ? (
+            {formData.profileImageBase64 || formData.profileImageUrl ? (
               <Image
-                src={formData.profileImageUrl}
+                src={
+                  formData.profileImageBase64
+                    ? `data:image/jpeg;base64,${formData.profileImageBase64}`
+                    : formData.profileImageUrl
+                }
                 style={{
                   width: "100%",
                   height: "100%",
@@ -255,7 +265,7 @@ const MyProfile = () => {
 
                         <Col md={12}>
                           <Form.Group className="mb-3">
-                            <Form.Label>Phone No.</Form.Label> 
+                            <Form.Label>Phone No.</Form.Label>
                             <Form.Control
                               type="text"
                               name="phone"

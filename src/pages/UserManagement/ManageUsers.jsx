@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, Button, Spinner } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
   faEdit,
@@ -138,7 +139,14 @@ const ManageUsers = () => {
         </Card.Header>
 
         <Card.Body>
-          <DataTable columns={columns} data={users} />
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <DataTable
+              columns={columns}
+              data={users}
+            />
+          )}
         </Card.Body>
       </Card>
     </div>

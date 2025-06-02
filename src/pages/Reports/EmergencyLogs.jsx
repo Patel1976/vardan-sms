@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Form, Button, Row, Col, Modal, Image } from "react-bootstrap";
+import { Card, Form, Button, Row, Col, Modal, Image, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -42,17 +42,30 @@ const EmergencyLogs = () => {
         toDate: filterData.toDate,
         token: token,
       };
-      const response = await axios.post(
-        `${API_URL_STAFF}get-all-emergency-log`,
-        requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setLogs(response.data.logs || []);
-    } catch (err) {
+      const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const rawLogs = response.data.images?.data || [];
+      const formattedLogs = rawLogs.map(log => ({
+        id: log.id,
+        date: new Date(log.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: new Date(log.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        staffName: log.user_id,
+        description: log.description,
+        image: log.image || "",
+      }));
+      setLogs(formattedLogs);
+    }
+    catch (err) {
       console.error("Failed to fetch all logs", err);
     } finally {
       setLoading(false);
@@ -126,17 +139,22 @@ const EmergencyLogs = () => {
     {
       field: "images",
       header: "Images",
-      render: (images) => (
-        <div>
-          {images.length > 0 ? (
-            <span className="badge bg-info">
-              {images.length} image{images.length !== 1 ? "s" : ""}
-            </span>
-          ) : (
-            <span className="badge bg-light text-dark">No images</span>
-          )}
-        </div>
-      ),
+      render: (_, row) => {
+        const image = row.image;
+        return (
+          <div>
+            {image && image.length > 0 ? (
+              <img
+                src={`data:image/jpeg;base64,${image}`}
+                alt="Emergency log thumbnail"
+                style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+              />
+            ) : (
+              <span className="badge bg-light text-dark">No image</span>
+            )}
+          </div>
+        );
+      }
     },
     {
       field: "actions",
@@ -160,43 +178,41 @@ const EmergencyLogs = () => {
     },
   ];
   // Fetch logs from API
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const response = await axios.post(
-          `${API_URL_STAFF}get-all-emergency-log`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        if (response.status === 200 && response.data.success === 1) {
-          const formattedLogs = response.data.data.map((log) => ({
-            id: log.id,
-            date: new Date(log.createdAt).toLocaleDateString(),
-            time: new Date(log.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            staffName: log.staff.name,
-            description: log.description,
-            images: log.images || [],
-          }));
-          setLogs(formattedLogs);
-        } else {
-          setError("Failed to fetch logs");
-        }
-      } catch (err) {
-        console.error("Error fetching logs:", err);
-        setError("An error occurred while fetching logs");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLogs();
-  }, [API_URL_STAFF]);
+  // useEffect(() => {
+  //   const fetchLogs = async () => {
+  //     try {
+  //       const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, {}, {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //         },
+  //       });
+  //       if (response.status === 200 && response.data.success === 1) {
+  //         const formattedLogs = response.data.data.map(log => ({
+  //           id: log.id,
+  //           date: new Date(log.created_at).toLocaleDateString(),
+  //           time: new Date(log.created_at).toLocaleTimeString([], {
+  //             hour: "2-digit",
+  //             minute: "2-digit",
+  //           }),
+  //           staffName: log.user_id,
+  //           description: log.description,
+  //           images: log.image || [],
+  //         }));
+  //         setLogs(formattedLogs);
+  //       } else {
+  //         setError("Failed to fetch logs");
+  //       }
+  //     }
+  //     catch (err) {
+  //       console.error("Error fetching logs:", err);
+  //       setError("An error occurred while fetching logs");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  //   fetchLogs();
+  // }
+  //   , [API_URL_STAFF]);
 
   return (
     <div className="emergency-logs">
@@ -267,7 +283,11 @@ const EmergencyLogs = () => {
           Emergency Logs List
         </Card.Header>
         <Card.Body>
-          <DataTable columns={columns} data={logs} showSearch={false} />
+          {loading ? (
+            <Spinner animation="border" />
+          ) : (
+            <DataTable columns={columns} data={logs} showSearch={false} />
+          )}
         </Card.Body>
       </Card>
 
@@ -280,29 +300,23 @@ const EmergencyLogs = () => {
         <Modal.Body>
           {selectedLog && (
             <div className="emergency-details">
-              {/* Only show description and large image(s) */}
               <div className="mb-4">
                 <h5>Description:</h5>
                 <p className="emergency-description">
                   {selectedLog.description}
                 </p>
               </div>
-
-              {selectedLog.images.length > 0 && (
-                <div>
-                  <h5 className="mb-3">Images:</h5>
-                  {selectedLog.images.map((img, index) => (
-                    <div key={index} className="mb-3">
-                      <Image
-                        src={img}
-                        alt={`Emergency ${index + 1}`}
-                        className="emergency-image"
-                        fluid
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div>
+                <h5>Image:</h5>
+                {selectedLog.image && (
+                  <Image
+                    src={`data:image/jpeg;base64,${selectedLog.image}`}
+                    alt="Emergency"
+                    className="emergency-image"
+                    style={{ maxHeight: '300px' }}
+                  />
+                )}
+              </div>
             </div>
           )}
         </Modal.Body>
