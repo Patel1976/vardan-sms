@@ -12,7 +12,7 @@ import PageTitle from "../../components/PageTitle";
 import DataTable from "../../components/DataTable";
 import ActionButton from "../../components/ActionButton";
 import StatusBadge from "../../components/StatusBadge";
-import axios from 'axios';
+import axios from "axios";
 import { parseCookies } from "nookies";
 
 const ManageStaff = () => {
@@ -20,7 +20,7 @@ const ManageStaff = () => {
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { token } = parseCookies();
 
   // Delete staff handler
@@ -31,15 +31,14 @@ const ManageStaff = () => {
         headers: {
           Authorization: `Bearer ${token}`
         }
-      });
+    });
       if (res.status === 200 && res.data.success === 1) {
         alert("Staff member deleted successfully");
-        setStaffMembers(staffMembers.filter(staff => staff.id !== staffId));
+        setStaffMembers(staffMembers.filter((staff) => staff.id !== staffId));
       } else {
         alert(res.data.message || "Failed to delete staff member");
       }
-    }
-    catch (err) {
+    } catch (err) {
       const msg = err.response?.data?.message || "Error deleting staff member";
       alert(msg);
     }
@@ -48,26 +47,26 @@ const ManageStaff = () => {
   // Table columns configuration
   const columns = [
     {
+      field: "avatar",
+      header: "Photo",
+      className: "photo-column",
+      render: (value, staff) => (
+        <img
+          src={staff.avatar}
+          alt={staff.name}
+          className="rounded-circle"
+          style={{ width: "40px", height: "40px", objectFit: "cover" }}
+        />
+      ),
+    },
+    {
       field: "name",
       header: "Name",
-      render: (value, staff) => (
-        <div className="d-flex align-items-center">
-          <img
-            src={staff.avatar}
-            alt={value}
-            className="rounded-circle me-2"
-            style={{ width: "32px", height: "32px" }}
-          />
-          <span>{value}</span>
-        </div>
-      ),
+      render: (value) => <span>{value}</span>,
     },
     { field: "email", header: "Email" },
     { field: "phone", header: "Phone" },
-    {
-      field: "department",
-      header: "Department",
-    },
+    { field: "department", header: "Department" },
     {
       field: "actions",
       header: "Actions",
@@ -95,13 +94,14 @@ const ManageStaff = () => {
       ),
     },
   ];
+
   useEffect(() => {
     const fetchStaff = async () => {
       try {
         const res = await axios.get(`${API_URL_STAFF}get-all-staff-users`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (res.status === 200 && res.data.success === 1) {
           const formattedStaff = res.data.data.map((staff) => ({
@@ -112,18 +112,16 @@ const ManageStaff = () => {
             department: staff.department,
             avatar: staff.image
               ? `data:image/jpeg;base64,${staff.image}`
-              : "profile.jpg",
+              : "placeholder.png",
           }));
           setStaffMembers(formattedStaff);
-        }
-        else {
-          setError('Failed to load Staff Members');
+        } else {
+          setError("Failed to load Staff Members");
         }
       } catch (error) {
         console.error("Error fetching staff members:", error);
-        setError('An error occurred while fetching users');
-      }
-      finally {
+        setError("An error occurred while fetching users");
+      } finally {
         setLoading(false);
       }
     };

@@ -41,7 +41,7 @@ const AddStaff = () => {
   });
 
   const [validated, setValidated] = useState(false);
-  
+
   useEffect(() => {
     if (isEditMode) {
       // Fetch staff data for editing
@@ -123,23 +123,24 @@ const AddStaff = () => {
       address: formData.address,
       status: formData.status,
       department: formData.department || null,
-      ...(formData.profileImageBase64 && { image: formData.profileImageBase64 }),
+      ...(formData.profileImageBase64 && {
+        image: formData.profileImageBase64,
+      }),
     };
     const submitForm = async () => {
       try {
         if (isEditMode) {
           axios.put(`${API_URL_STAFF}update-staff-user/${id}`, payload, {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
           alert("Staff updated successfully");
-        }
-        else {
+        } else {
           axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
           alert("Staff added successfully");
         }
@@ -273,6 +274,19 @@ const AddStaff = () => {
                       />
                     </Form.Group>
                   </Col>
+
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="staffDepartment">
+                      <Form.Label>Department</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter department"
+                        name="department"
+                        value={formData.department}
+                        onChange={handleInputChange}
+                      ></Form.Control>
+                    </Form.Group>
+                  </Col>
                 </Row>
               </Col>
             </Row>
@@ -291,25 +305,6 @@ const AddStaff = () => {
                 </Form.Group>
               </Col>
             </Row>
-
-            <h5 className="mt-3 mb-3">Employment Information</h5>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3" controlId="staffDepartment">
-                  <Form.Label>Department</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleInputChange}
-                  >
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-            </Row>
-
             <div className="d-flex gap-2 mt-4">
               <Button variant="primary" type="submit">
                 <FontAwesomeIcon icon={faSave} className="me-1" />
@@ -324,7 +319,7 @@ const AddStaff = () => {
           </Form>
         </Card.Body>
       </Card>
-    </div >
+    </div>
   );
 };
 

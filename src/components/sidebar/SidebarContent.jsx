@@ -15,7 +15,7 @@ import {
   faCube,
   faEnvelopeOpenText,
 } from "@fortawesome/free-solid-svg-icons";
-import { parseCookies } from 'nookies';
+import { parseCookies } from "nookies";
 
 const iconMap = {
   "tachometer-alt": faTachometerAlt,
@@ -38,11 +38,15 @@ const SidebarContent = ({
   useEffect(() => {
     const fetchModules = async () => {
       try {
-        const response = await axios.post(`${API_URL}get-all-user-module`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.post(
+          `${API_URL}get-all-user-module`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (response.data.success) {
           setMenuData(response.data.data);
         }
@@ -82,8 +86,13 @@ const SidebarContent = ({
                 <li key={mainModule.id} className="nav-item">
                   <NavLink
                     to={`/${mainModule.slug}`}
-                    className="nav-link text-sidebar-foreground"
+                    className="nav-link text-sidebar-foreground dashboard-menu-link"
                     end
+                    onClick={() => {
+                      if (isMobile) {
+                        setSidebarOpen(false);
+                      }
+                    }}
                   >
                     <FontAwesomeIcon icon={icon} />
                     {isOpen && (
