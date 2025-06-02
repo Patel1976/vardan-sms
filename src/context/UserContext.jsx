@@ -5,44 +5,43 @@ import { parseCookies } from "nookies";
 const UserContext = createContext(undefined);
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const { token } = parseCookies();
-  const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
+    const [user, setUser] = useState(null);
+    const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
+    const { token } = parseCookies();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.post(
-          `${API_URL_STAFF}user-profile`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (res.status === 200 && res.data.success === 1) {
-          setUser(res.data.data);
-        }
-      } catch (error) {
-        console.error("User fetch error:", error);
-      }
-    };
+    useEffect(() => {
+        if (!token) return;
+        const fetchUser = async () => {
+            try {
+                const res = await axios.post(
+                    `${API_URL_STAFF}user-profile`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (res.status === 200 && res.data.success === 1) {
+                    setUser(res.data.data);
+                }
+            } catch (error) {
+                console.error("User fetch error:", error);
+            }
+        };
 
-    if (token) {
-      fetchUser();
-    }
-  }, [token]);
+        fetchUser();
+    }, []);
 
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
+    return (
+        <UserContext.Provider value={{ user, setUser }}>
+            {children}
+        </UserContext.Provider>
+    );
 };
 
 export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within UserProvider");
-  return context;
+    const context = useContext(UserContext);
+    if (!context) throw new Error("useUser must be used within UserProvider");
+    return context;
 };
