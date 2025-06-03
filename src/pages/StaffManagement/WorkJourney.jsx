@@ -45,17 +45,6 @@ const WorkJourney = () => {
       [name]: value,
     });
   };
-  const isDateRangeValid = () => {
-    const { fromDate, toDate } = dateRange;
-    if (!fromDate || !toDate) return true;
-
-    const start = new Date(fromDate);
-    const end = new Date(toDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-    return diffDays <= 7;
-  };
   const handleBack = () => {
     setShowMap(false);
     setJourneyPath([]);
@@ -92,12 +81,12 @@ const WorkJourney = () => {
         const timestamp = Number(item.created_at?.$date?.$numberLong);
         const time = timestamp
           ? new Date(timestamp).toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
           : "Invalid Date";
         return {
           lat: Number(item.latitude),
@@ -121,19 +110,11 @@ const WorkJourney = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isDateRangeValid()) {
-      alert("Please select a date range of 7 days or less.");
-      return;
-    }
     await fetchJourneyData();
     setShowMap(true);
   };
 
   const handleFilterJourney = async () => {
-    if (!isDateRangeValid()) {
-      alert("Please select a date range of 7 days or less.");
-      return;
-    }
     await fetchJourneyData();
   };
 
@@ -168,6 +149,16 @@ const WorkJourney = () => {
                       name="fromDate"
                       value={dateRange.fromDate}
                       onChange={handleInputChange}
+                      min={
+                        dateRange.toDate
+                          ? new Date(
+                            new Date(dateRange.toDate).getTime() - 7 * 24 * 60 * 60 * 1000
+                          )
+                            .toISOString()
+                            .split("T")[0]
+                          : ""
+                      }
+                      max={dateRange.toDate}
                     />
                   </Form.Group>
                 </Col>
@@ -179,6 +170,16 @@ const WorkJourney = () => {
                       name="toDate"
                       value={dateRange.toDate}
                       onChange={handleInputChange}
+                      min={dateRange.fromDate}
+                      max={
+                        dateRange.fromDate
+                          ? new Date(
+                            new Date(dateRange.fromDate).getTime() + 7 * 24 * 60 * 60 * 1000
+                          )
+                            .toISOString()
+                            .split("T")[0]
+                          : ""
+                      }
                     />
                   </Form.Group>
                 </Col>
@@ -214,6 +215,16 @@ const WorkJourney = () => {
                       name="fromDate"
                       value={dateRange.fromDate}
                       onChange={handleInputChange}
+                      min={
+                        dateRange.toDate
+                          ? new Date(
+                            new Date(dateRange.toDate).getTime() - 7 * 24 * 60 * 60 * 1000
+                          )
+                            .toISOString()
+                            .split("T")[0]
+                          : ""
+                      }
+                      max={dateRange.toDate}
                     />
                   </Form.Group>
                 </Col>
@@ -225,6 +236,16 @@ const WorkJourney = () => {
                       name="toDate"
                       value={dateRange.toDate}
                       onChange={handleInputChange}
+                      min={dateRange.fromDate}
+                      max={
+                        dateRange.fromDate
+                          ? new Date(
+                            new Date(dateRange.fromDate).getTime() + 7 * 24 * 60 * 60 * 1000
+                          )
+                            .toISOString()
+                            .split("T")[0]
+                          : ""
+                      }
                     />
                   </Form.Group>
                 </Col>

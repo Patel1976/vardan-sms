@@ -12,6 +12,7 @@ import DataTable from "../../components/DataTable";
 import SearchStaff from "../../components/searchStaff";
 import axios from "axios";
 import { parseCookies } from "nookies";
+import ExcelDownloadButton from "../../components/ExcelDownloadButton";
 
 const TimeLogs = () => {
   const navigate = useNavigate();
@@ -99,27 +100,6 @@ const TimeLogs = () => {
     }
   };
 
-  const handleExportLogs = async () => {
-    try {
-      const res = await axios.get(`${TIME_LOG_API}/logs/export`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: "blob",
-        params: {
-          id: staffId,
-          ...filterData,
-        },
-      });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "time_logs.csv");
-      document.body.appendChild(link);
-      link.click();
-    } catch (error) {
-      console.error("Export failed", error);
-    }
-  };
-
   // --- Table columns & actions ---
   const columns = [
     { field: "date", header: "Date" },
@@ -158,10 +138,12 @@ const TimeLogs = () => {
   ];
 
   const tableActions = (
-    <Button variant="outline-secondary" size="sm" onClick={handleExportLogs}>
-      <FontAwesomeIcon icon={faFileExport} className="me-1" />
-      Export Logs
-    </Button>
+    <ExcelDownloadButton
+      startdate={filterData.fromDate}
+      enddate={filterData.toDate}
+      data={logs}
+      fileName={selectedStaff}
+    />
   );
 
   return (
@@ -194,6 +176,7 @@ const TimeLogs = () => {
                     name="fromDate"
                     value={filterData.fromDate}
                     onChange={handleFilterChange}
+                    max={filterData.toDate}
                   />
                 </Form.Group>
               </Col>
@@ -205,6 +188,7 @@ const TimeLogs = () => {
                     name="toDate"
                     value={filterData.toDate}
                     onChange={handleFilterChange}
+                    min={filterData.fromDate}
                   />
                 </Form.Group>
               </Col>
