@@ -38,8 +38,8 @@ const EmergencyLogs = () => {
     try {
       setLoading(true);
       const requestData = {
-        fromDate: filterData.fromDate,
-        toDate: filterData.toDate,
+        start_date: filterData.fromDate,
+        end_date: filterData.toDate,
         token: token,
       };
       const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, requestData, {
@@ -48,6 +48,7 @@ const EmergencyLogs = () => {
         },
       });
       const rawLogs = response.data.images?.data || [];
+      console.log("Raw logs data:", rawLogs);
       const formattedLogs = rawLogs.map(log => ({
         id: log.id,
         date: new Date(log.created_at).toLocaleDateString("en-US", {
@@ -74,8 +75,8 @@ const EmergencyLogs = () => {
   const fetchStaffLogs = async (staffId) => {
     try {
       const requestData = {
-        fromDate: filterData.fromDate,
-        toDate: filterData.toDate,
+        start_date: filterData.fromDate,
+        end_date: filterData.toDate,
         token: token,
       };
       const response = await axios.post(
@@ -183,52 +184,10 @@ const EmergencyLogs = () => {
             onClick={() => handleViewLog(log)}
             title="View Details"
           />
-          <ActionButton
-            icon={faDownload}
-            variant="outline-success"
-            onClick={() => console.log("Download log:", log.id)}
-            title="Download Report"
-          />
         </div>
       ),
     },
   ];
-  // Fetch logs from API
-  // useEffect(() => {
-  //   const fetchLogs = async () => {
-  //     try {
-  //       const response = await axios.post(`${API_URL_STAFF}get-all-emergency-log`, {}, {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //         },
-  //       });
-  //       if (response.status === 200 && response.data.success === 1) {
-  //         const formattedLogs = response.data.data.map(log => ({
-  //           id: log.id,
-  //           date: new Date(log.created_at).toLocaleDateString(),
-  //           time: new Date(log.created_at).toLocaleTimeString([], {
-  //             hour: "2-digit",
-  //             minute: "2-digit",
-  //           }),
-  //           staffName: log.user_id,
-  //           description: log.description,
-  //           images: log.image || [],
-  //         }));
-  //         setLogs(formattedLogs);
-  //       } else {
-  //         setError("Failed to fetch logs");
-  //       }
-  //     }
-  //     catch (err) {
-  //       console.error("Error fetching logs:", err);
-  //       setError("An error occurred while fetching logs");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  //   fetchLogs();
-  // }
-  //   , [API_URL_STAFF]);
 
   return (
     <div className="emergency-logs">
@@ -264,6 +223,7 @@ const EmergencyLogs = () => {
                     name="fromDate"
                     value={filterData.fromDate}
                     onChange={handleFilterChange}
+                    max={filterData.toDate}
                   />
                 </Form.Group>
               </Col>
@@ -276,6 +236,7 @@ const EmergencyLogs = () => {
                     name="toDate"
                     value={filterData.toDate}
                     onChange={handleFilterChange}
+                    min={filterData.fromDate}
                   />
                 </Form.Group>
               </Col>
