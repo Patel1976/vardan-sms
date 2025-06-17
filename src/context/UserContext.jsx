@@ -5,10 +5,12 @@ import { parseCookies } from "nookies";
 const UserContext = createContext(undefined);
 
 export const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        const storedUser = localStorage.getItem("user");
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
     const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
     const { token } = parseCookies();
-
     useEffect(() => {
         if (!token) return;
         const fetchUser = async () => {
@@ -24,14 +26,24 @@ export const UserProvider = ({ children }) => {
                 );
                 if (res.status === 200 && res.data.success === 1) {
                     setUser(res.data.data);
+                    localStorage.setItem("user", JSON.stringify(res.data.data));
                 }
             } catch (error) {
                 console.error("User fetch error:", error);
             }
         };
+        if (!user) {
+            fetchUser();
+        }
+    }, [token]);
 
-        fetchUser();
-    }, []);
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+        } else {
+            localStorage.removeItem("user");
+        }
+    }, [user]);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>

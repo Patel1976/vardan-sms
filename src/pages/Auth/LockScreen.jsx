@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLock, faUnlock } from "@fortawesome/free-solid-svg-icons";
 import { setCookie } from "nookies";
 import axios from "axios";
+import { useUser } from '../../context/UserContext';
 
 const LockScreen = () => {
   const navigate = useNavigate();
@@ -12,9 +13,12 @@ const LockScreen = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const API_URL = import.meta.env.VITE_BACKEND_URL;
+  const { setUser } = useUser();
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem("email");
+    // const savedEmail = localStorage.getItem("email");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const savedEmail = user?.email;
     if (!savedEmail) {
       console.log('Email Not found')
     } else {
@@ -45,12 +49,23 @@ const LockScreen = () => {
       });
 
       if (res.status === 200 && res.data.success === 1) {
-        const { token } = res.data.data;
+        const { token, userData } = res.data.data;
         setCookie(null, "token", token, {
           maxAge: 30 * 60,
           path: "/",
         });
-        navigate("/dashboard");
+        const userInfo = {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          image: userData.image
+        };
+        localStorage.setItem("user", JSON.stringify(userInfo));
+        setUser(userInfo);
+        const redirectPath = localStorage.getItem("redirect_after_unlock") || "/dashboard";
+        localStorage.removeItem("redirect_after_unlock");
+        navigate(redirectPath);
       }
     } catch (error) {
       if (error.response && error.response.data) {

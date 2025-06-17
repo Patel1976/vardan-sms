@@ -19,7 +19,8 @@ import axios from "axios";
 const ManageUsers = () => {
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_BASE_URL;
-  const loggedInUserId = sessionStorage.getItem("LoggedInUserId");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const loggedInUserId = user?.id;
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,7 +71,7 @@ const ManageUsers = () => {
             onClick={() => navigate(`/users/edit-user/${user.id}`)}
             title="Edit User"
           />
-          {String(user.id) !== String(loggedInUserId) && (
+          {String(user.id) !== "1" && (
             <ActionButton
               icon={faTrashAlt}
               variant="outline-danger"
