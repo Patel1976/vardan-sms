@@ -53,13 +53,13 @@ const AppContent = () => {
 
   useEffect(() => {
     const { token } = parseCookies();
-    const emailSaved = localStorage.getItem('email');
+    const user = JSON.parse(localStorage.getItem("user"));
+    const emailSaved = user?.email;
     const publicRoutes = ['/login', '/lock-screen', '/forget-password', '/reset-password'];
-
     const isPublicRoute = publicRoutes.some(route => location.pathname.startsWith(route));
-
     if (!token && !isPublicRoute) {
       if (emailSaved) {
+        localStorage.setItem('redirect_after_unlock', location.pathname);
         navigate('/lock-screen', { replace: true });
       } else {
         alert('You are not authenticated. Please log in.');

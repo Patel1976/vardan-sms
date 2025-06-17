@@ -37,10 +37,8 @@ const AddUser = () => {
     password: "",
     confirmPassword: "",
     phone: "",
-    role: "",
   });
 
-  const [roles, setRoles] = useState([]);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [validated, setValidated] = useState(false);
@@ -64,7 +62,6 @@ const AddUser = () => {
             name: user.name || "",
             email: user.email || "",
             phone: user.phone || "",
-            role: user.role || "",
             status: user.status || "active",
             password: "",
             confirmPassword: "",
@@ -75,26 +72,6 @@ const AddUser = () => {
           alert("Failed to load user data.");
         });
     }
-
-    const fetchRoles = async () => {
-      try {
-        const response = await axios.post(
-          `${API_URL}get-all-roles`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const fetchedRoles = response.data.data || [];
-        setRoles(fetchedRoles);
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-      }
-    };
-
-    fetchRoles();
   }, [id, isEditMode, API_URL]);
 
   const handleInputChange = (e) => {
@@ -124,7 +101,6 @@ const AddUser = () => {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      role: formData.role,
       ...(isEditMode ? {} : { password: formData.password }),
     };
 
@@ -223,27 +199,6 @@ const AddUser = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                       />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group className="mb-3" controlId="userRole">
-                      <Form.Label>Role</Form.Label>
-                      <Form.Select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Select Role</option>
-                        {roles.map((role) => (
-                          <option key={role.id} value={role.name}>
-                            {role.name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
-                        Role is required.
-                      </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
                 </Row>
@@ -363,27 +318,6 @@ const AddUser = () => {
                             value={formData.phone}
                             onChange={handleInputChange}
                           />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="userRole">
-                          <Form.Label>Role</Form.Label>
-                          <Form.Select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            required
-                          >
-                            <option value="">Select Role</option>
-                            {roles.map((role) => (
-                              <option key={role.id} value={role.name}>
-                                {role.name}
-                              </option>
-                            ))}
-                          </Form.Select>
-                          <Form.Control.Feedback type="invalid">
-                            Role is required.
-                          </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
                     </Row>

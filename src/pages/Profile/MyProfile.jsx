@@ -22,6 +22,7 @@ const MyProfile = () => {
   const { token } = parseCookies();
   const { user, setUser } = useUser();
   const [formData, setFormData] = useState({});
+  console.log('Phone', user);
   useEffect(() => {
     if (user) {
       setFormData({
@@ -151,6 +152,8 @@ const MyProfile = () => {
           .flat()
           .join("\n");
         alert(messages);
+      } else if (error.response?.data?.message) {
+        alert(error.response.data.message);
       } else {
         alert("An error occurred while updating your password.");
       }

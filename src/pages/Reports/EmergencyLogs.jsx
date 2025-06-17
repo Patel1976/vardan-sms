@@ -48,7 +48,6 @@ const EmergencyLogs = () => {
         },
       });
       const rawLogs = response.data.images?.data || [];
-      console.log("Raw logs data:", rawLogs);
       const formattedLogs = rawLogs.map(log => ({
         id: log.id,
         date: new Date(log.created_at).toLocaleDateString("en-US", {

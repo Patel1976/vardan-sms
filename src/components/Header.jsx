@@ -18,7 +18,7 @@ import { useUser } from '../context/UserContext';
 const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const API_URL = import.meta.env.VITE_BASE_URL;
   const { token } = parseCookies();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -29,7 +29,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
           'Authorization': `Bearer ${token}`,
         }
       });
-      localStorage.removeItem("email");
+      localStorage.removeItem("user");
       sessionStorage.removeItem("Role");
       destroyCookie(null, 'token');
       navigate('/login');
@@ -37,9 +37,11 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
       console.error("Logout failed:", error);
     }
   };
-  const userName = user?.name;
-  const userImage = user?.image
-    ? `data:image/jpeg;base64,${user.image}`
+  const name = user?.name || '';
+  const email = user?.email || '';
+  const image = user?.image || '';
+  const userImage = image
+    ? `data:image/jpeg;base64,${image}`
     : '/placeholder.png';
 
   return (
@@ -85,7 +87,7 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
                   className="user-avatar"
                 />
               </div>
-              <span className="user-name d-none d-md-inline ms-2">{userName}</span>
+              <span className="user-name d-none d-md-inline ms-2">{name}</span>
             </div>
           </Dropdown.Toggle>
 
@@ -97,7 +99,8 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
               className={`px-3 py-2 border-bottom ${theme === "dark" ? "bg-dark border-secondary" : "bg-light"
                 }`}
             >
-              <div className="fw-bold">{userName}</div>
+              <div className="fw-bold">{name}</div>
+              <div style={{ fontSize: "14px" }}>{email}</div>
             </div>
 
             <Dropdown.Item as={Link} to="/profile">
