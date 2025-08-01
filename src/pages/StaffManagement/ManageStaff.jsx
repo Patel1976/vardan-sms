@@ -18,6 +18,7 @@ import { parseCookies } from "nookies";
 const ManageStaff = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -111,7 +112,7 @@ const ManageStaff = () => {
             phone: staff.phone,
             department: staff.department,
             avatar: staff.image
-              ? `data:image/jpeg;base64,${staff.image}`
+              ? `${IMAGE_URL}${staff.image}`
               : "placeholder.png",
           }));
           setStaffMembers(formattedStaff);
