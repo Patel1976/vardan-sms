@@ -13,11 +13,11 @@ const LockScreen = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const API_URL = import.meta.env.VITE_BACKEND_URL;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const { setUser } = useUser();
 
+  const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
-    // const savedEmail = localStorage.getItem("email");
-    const user = JSON.parse(localStorage.getItem("user"));
     const savedEmail = user?.email;
     if (!savedEmail) {
       console.log('Email Not found')
@@ -25,6 +25,9 @@ const LockScreen = () => {
       setEmail(savedEmail);
     }
   }, []);
+  const userImage = user?.image
+    ? `${IMAGE_URL}${user.image}`
+    : '/placeholder.png';
 
   const validateForm = () => {
     const newErrors = {};
@@ -87,7 +90,7 @@ const LockScreen = () => {
               </Card.Title>
               <div className="lock-screen mb-4 d-flex align-items-center">
                 <img
-                  src="/user.jpg"
+                  src={userImage}
                   alt="User"
                   className="rounded-circle"
                   style={{ width: "100px", height: "auto", objectFit: "cover" }}

@@ -6,7 +6,6 @@ import {
   Button,
   Row,
   Col,
-  InputGroup,
   Image,
 } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,6 +23,7 @@ const AddStaff = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const isEditMode = !!id;
   const { token } = parseCookies();
 
@@ -36,8 +36,8 @@ const AddStaff = () => {
     address: "",
     status: true,
     department: "",
-    profileImageBase64: "",
     profileImageFile: null,
+    profileImagePreview: "",
   });
 
   const [validated, setValidated] = useState(false);
@@ -56,7 +56,8 @@ const AddStaff = () => {
             }
           );
           const staffData = response.data.data;
-          setFormData({
+          setFormData((prev) => ({
+            ...prev,
             name: staffData.name || "",
             email: staffData.email || "",
             phone: staffData.phone || "",
@@ -64,9 +65,10 @@ const AddStaff = () => {
             address: staffData.address || "",
             status: staffData.status ?? true,
             department: staffData.department || "",
-            profileImageBase64: staffData.image || "",
-            profileImageFile: null,
-          });
+            profileImagePreview: staffData.image
+              ? `${IMAGE_URL}${staffData.image}`
+              : "",
+          }));
         } catch (error) {
           console.error("Error fetching staff data:", error);
           alert("Failed to load user data.");
@@ -92,6 +94,7 @@ const AddStaff = () => {
       setFormData((prev) => ({
         ...prev,
         profileImageFile: file,
+        profileImagePreview: URL.createObjectURL(file),
       }));
 
       const reader = new FileReader();
@@ -115,31 +118,36 @@ const AddStaff = () => {
       return;
     }
 
-    const payload = {
-      name: formData.name,
-      email: formData.email || null,
-      phone: formData.phone,
-      mpin: formData.mpin || null,
-      address: formData.address,
-      status: formData.status,
-      department: formData.department || null,
-      ...(formData.profileImageBase64 && {
-        image: formData.profileImageBase64,
-      }),
-    };
+    const payload = new FormData();
+    payload.append("name", formData.name);
+    payload.append("email", formData.email || "");
+    payload.append("phone", formData.phone);
+    payload.append("mpin", formData.mpin || "");
+    payload.append("address", formData.address);
+    payload.append("status", formData.status ? 1 : 0);
+    payload.append("department", formData.department || "");
+    if (formData.profileImageFile) {
+      payload.append("image", formData.profileImageFile);
+    }
     const submitForm = async () => {
       try {
         if (isEditMode) {
-          axios.put(`${API_URL_STAFF}update-staff-user/${id}`, payload, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          await axios.post(
+            `${API_URL_STAFF}update-staff-user/${id}?_method=PUT`,
+            payload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
           alert("Staff updated successfully");
         } else {
-          axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
+          await axios.post(`${API_URL_STAFF}create-staff-user`, payload, {
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
             },
           });
           alert("Staff added successfully");
@@ -183,20 +191,12 @@ const AddStaff = () => {
             <Row>
               <Col md={12} className="mb-4 text-center">
                 <div
-                  onClick={() =>
-                    document.getElementById("profileImage").click()
-                  }
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const file = e.dataTransfer.files[0];
-                    if (file) handleImageChange({ target: { files: [file] } });
-                  }}
+                  onClick={() => document.getElementById("profileImage").click()}
                   className="upload-profile"
                 >
-                  {formData.profileImageBase64 ? (
+                  {formData.profileImagePreview ? (
                     <Image
-                      src={`data:image/jpeg;base64,${formData.profileImageBase64}`}
+                      src={formData.profileImagePreview}
                       style={{
                         width: "100%",
                         height: "100%",

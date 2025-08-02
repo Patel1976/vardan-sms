@@ -17,6 +17,7 @@ import { useUser } from '../context/UserContext';
 
 const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const API_URL = import.meta.env.VITE_BASE_URL;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const { token } = parseCookies();
   const { user, setUser } = useUser();
   const navigate = useNavigate();
@@ -41,8 +42,8 @@ const Header = ({ toggleSidebar, theme, toggleTheme }) => {
   const email = user?.email || '';
   const image = user?.image || '';
   const userImage = image
-    ? `data:image/jpeg;base64,${image}`
-    : '/placeholder.png';
+    ? `${IMAGE_URL}${image}`
+    : '../../public/placeholder.png';
 
   return (
     <header className="header" style={{ color: "rgba(255, 255, 255, 0.9)" }}>

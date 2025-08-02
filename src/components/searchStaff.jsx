@@ -2,7 +2,7 @@ import axios from 'axios';
 import Select from 'react-select';
 import { useState, useCallback, useEffect } from 'react';
 
-const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
+const SearchBar = ({ onSelectedOptionsChange, staffName, token, preselectedStaffId }) => {
     const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
     const [selectedOption, setSelectedOption] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
@@ -16,7 +16,7 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
         fetchSuggestions('');
     }, [staffName]);
 
-    const fetchSuggestions = useCallback(async (query) => {
+    const fetchSuggestions = useCallback(async (query = '') => {
         try {
             const response = await axios.get(`${API_URL_STAFF}search-staff?query=${query}`, {
                 headers: {
@@ -29,10 +29,14 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
                 uuid: item.uuid
             }));
             setSuggestions(options);
+            if (preselectedStaffId) {
+                const preselected = options.find(opt => opt.value.toString() === preselectedStaffId.toString());
+                if (preselected) setSelectedOption(preselected);
+            }
         } catch (error) {
             console.error('Error fetching suggestions:', error);
         }
-    }, [token]);
+    }, [token, preselectedStaffId]);
 
     const handleInputChange = (newQuery) => {
         fetchSuggestions(newQuery);
@@ -44,24 +48,24 @@ const SearchBar = ({ onSelectedOptionsChange, staffName, token }) => {
     };
 
     return (
-      <div className="form-group">
-        <Select
-          isClearable
-          menuPlacement="auto"
-          value={selectedOption}
-          onChange={handleSelectChange}
-          onInputChange={handleInputChange}
-          options={suggestions}
-          placeholder="Search Staff by Name..."
-          classNamePrefix="staff-select"
-          styles={{
-            control: (provided) => ({
-              ...provided,
-              minWidth: "16rem",
-            }),
-          }}
-        />
-      </div>
+        <div className="form-group">
+            <Select
+                isClearable
+                menuPlacement="auto"
+                value={selectedOption}
+                onChange={handleSelectChange}
+                onInputChange={handleInputChange}
+                options={suggestions}
+                placeholder="Search Staff by Name..."
+                classNamePrefix="staff-select"
+                styles={{
+                    control: (provided) => ({
+                        ...provided,
+                        minWidth: "16rem",
+                    }),
+                }}
+            />
+        </div>
     );
 };
 

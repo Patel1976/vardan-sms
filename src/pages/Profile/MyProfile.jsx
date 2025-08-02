@@ -19,6 +19,7 @@ import { useUser } from '../../context/UserContext';
 const MyProfile = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const { token } = parseCookies();
   const { user, setUser } = useUser();
   const [formData, setFormData] = useState({});
@@ -30,8 +31,9 @@ const MyProfile = () => {
         firstName: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        profileImageBase64: user.image || "",
+        profileImage: user.image || "",
         profileImageFile: null,
+        profileImagePreview: null,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
@@ -43,15 +45,11 @@ const MyProfile = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData((prev) => ({ ...prev, profileImageFile: file }));
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFormData((prev) => ({
-          ...prev,
-          profileImageBase64: event.target.result.split(",")[1],
-        }));
-      };
-      reader.readAsDataURL(file);
+      setFormData((prev) => ({
+        ...prev,
+        profileImageFile: file,
+        profileImagePreview: URL.createObjectURL(file),
+      }));
     }
   };
 
@@ -66,18 +64,20 @@ const MyProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        name: formData.firstName,
-        email: formData.email,
-        phone: formData.phone,
-        ...(formData.profileImageBase64 && { image: formData.profileImageBase64 }),
-      };
-      const res = await axios.put(
-        `${API_URL_STAFF}edit-profile/${formData.id}`,
+      const payload = new FormData();
+      payload.append("name", formData.firstName);
+      payload.append("email", formData.email);
+      payload.append("phone", formData.phone);
+      if (formData.profileImageFile) {
+        payload.append("image", formData.profileImageFile);
+      }
+      const res = await axios.post(
+        `${API_URL_STAFF}edit-profile/${formData.id}?_method=PUT`,
         payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -88,7 +88,7 @@ const MyProfile = () => {
           name: formData.firstName,
           email: formData.email,
           phone: formData.phone,
-          image: formData.profileImageBase64 || prevUser.image,
+          image: res.data.data.image,
         }));
       } else {
         alert("Failed to update profile.");
@@ -176,12 +176,14 @@ const MyProfile = () => {
             }}
             className="upload-profile"
           >
-            {formData.profileImageBase64 || formData.profileImageUrl ? (
+            {formData.profileImage || formData.profileImageUrl ? (
               <Image
                 src={
-                  formData.profileImageBase64
-                    ? `data:image/jpeg;base64,${formData.profileImageBase64}`
-                    : formData.profileImageUrl
+                  formData.profileImagePreview
+                    ? formData.profileImagePreview
+                    : formData.profileImage
+                      ? `${IMAGE_URL}${formData.profileImage}`
+                      : "../../public/placeholder.png"
                 }
                 style={{
                   width: "100%",

@@ -18,6 +18,7 @@ import { parseCookies } from "nookies";
 const EmergencyLogs = () => {
   const navigate = useNavigate();
   const API_URL_STAFF = import.meta.env.VITE_BASE_URL_STAFF;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const { token } = parseCookies();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,6 +74,7 @@ const EmergencyLogs = () => {
   };
   const fetchStaffLogs = async (staffId) => {
     try {
+      setLoading(true);
       const requestData = {
         start_date: filterData.fromDate,
         end_date: filterData.toDate,
@@ -105,7 +107,7 @@ const EmergencyLogs = () => {
       }));
       setLogs(formattedLogs);
     } catch (err) {
-      console.error("Failed to fetch staff logs", error);
+      console.error("Failed to fetch staff logs", err);
     } finally {
       setLoading(false);
     }
@@ -161,7 +163,7 @@ const EmergencyLogs = () => {
           <div>
             {image && image.length > 0 ? (
               <img
-                src={`data:image/jpeg;base64,${image}`}
+                src={`${IMAGE_URL}${image}`}
                 alt="Emergency log thumbnail"
                 style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
               />
@@ -285,8 +287,8 @@ const EmergencyLogs = () => {
               <div>
                 <h5>Image:</h5>
                 {selectedLog.image && (
-                  <Image
-                    src={`data:image/jpeg;base64,${selectedLog.image}`}
+                  <img
+                    src={`${IMAGE_URL}${selectedLog.image}`}
                     alt="Emergency"
                     className="emergency-image"
                     style={{ maxHeight: '300px' }}

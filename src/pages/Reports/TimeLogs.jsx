@@ -31,6 +31,13 @@ const TimeLogs = () => {
 
   const handleStaffSelect = (staff) => {
     setSelectedStaff(staff);
+    const params = new URLSearchParams(location.search);
+    if (staff?.value) {
+      params.set("staffId", staff.value);
+    } else {
+      params.delete("staffId");
+    }
+    navigate({ search: params.toString() });
   };
 
   const fetchAllLogs = async () => {
@@ -80,8 +87,8 @@ const TimeLogs = () => {
   };
 
   useEffect(() => {
-    if (selectedStaff?.value) {
-      fetchStaffLogs(selectedStaff.value);
+    if (staffIdFromUrl) {
+      fetchStaffLogs(staffIdFromUrl);
     } else {
       fetchAllLogs();
     }
@@ -164,6 +171,7 @@ const TimeLogs = () => {
                   <SearchStaff
                     onSelectedOptionsChange={handleStaffSelect}
                     token={token}
+                    preselectedStaffId={staffIdFromUrl}
                   />
                 </Form.Group>
               </Col>
@@ -212,11 +220,11 @@ const TimeLogs = () => {
           <div className="text-xl fw-semibold">
             <FontAwesomeIcon icon={faClock} className="me-2" />
             Time Logs
-            {selectedStaff?.label && (
+            {/* {selectedStaff?.label && (
               <Badge className="ms-2 tl-staff-label">
                 Filtered by Staff: {selectedStaff.label}
               </Badge>
-            )}
+            )} */}
           </div>
         </Card.Header>
         <Card.Body>
