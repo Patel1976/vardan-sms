@@ -13,6 +13,7 @@ const LockScreen = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const API_URL = import.meta.env.VITE_BACKEND_URL;
+  const IMAGE_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL;
   const { setUser } = useUser();
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -25,7 +26,7 @@ const LockScreen = () => {
     }
   }, []);
   const userImage = user?.image
-    ? `data:image/jpeg;base64,${user.image}`
+    ? `${IMAGE_URL}${user.image}`
     : '/placeholder.png';
 
   const validateForm = () => {

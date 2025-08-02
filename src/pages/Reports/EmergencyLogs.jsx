@@ -74,6 +74,7 @@ const EmergencyLogs = () => {
   };
   const fetchStaffLogs = async (staffId) => {
     try {
+      setLoading(true);
       const requestData = {
         start_date: filterData.fromDate,
         end_date: filterData.toDate,
@@ -106,7 +107,7 @@ const EmergencyLogs = () => {
       }));
       setLogs(formattedLogs);
     } catch (err) {
-      console.error("Failed to fetch staff logs", error);
+      console.error("Failed to fetch staff logs", err);
     } finally {
       setLoading(false);
     }
